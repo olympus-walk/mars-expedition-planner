@@ -46,6 +46,24 @@ export const LAYERS = [
     provenance: 'real',
     source: 'NASA/JPL Mars Trek · MOLA relieve coloreado',
   },
+  {
+    id: 'themisDay', group: 'base', type: 'tile',
+    name: 'Infrarrojo · THEMIS diurno (100 m)',
+    url: `${T}/THEMIS_DayIR_ControlledMosaics_100m_v2_oct2018/1.0.0//default/default028mm/{z}/{y}/{x}.png`,
+    maxNativeZoom: 9,
+    bounds: [[-65.0006576, -179.9999997], [65.0007535, 179.9998849]],
+    provenance: 'real',
+    source: 'NASA/JPL Mars Trek · Mars Odyssey THEMIS IR diurno (imagen, no es temperatura)',
+  },
+  {
+    id: 'themisNight', group: 'base', type: 'tile',
+    name: 'Infrarrojo · THEMIS nocturno (100 m)',
+    url: `${T}/THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018/1.0.0//default/default028mm/{z}/{y}/{x}.png`,
+    maxNativeZoom: 9,
+    bounds: [[-65.0006576, -179.9999997], [65.0007535, 179.9998849]],
+    provenance: 'real',
+    source: 'NASA/JPL Mars Trek · Mars Odyssey THEMIS IR nocturno (imagen, no es temperatura)',
+  },
 
   // ───────── TERRENO (calculadas en grid.js) ─────────
   {

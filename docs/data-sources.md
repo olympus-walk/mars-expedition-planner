@@ -19,7 +19,8 @@ La etiqueta está en el campo `provenance` de cada capa en `src/data/layers.js` 
 | Mapa base CTX Gale | `layers.js` (`ctxGale`) | real | Ver sección 1. |
 | Mapa base Viking color | `layers.js` (`viking`) | real | Mosaico global de 232 m. |
 | Mapa base MOLA | `layers.js` (`mola`) | real | Imagen de relieve coloreado, no contiene valores de elevación. |
-| Malla de elevación real | `src/data/grid.json` (`gridFromJson`) | real / derived | Es la malla que usa la app. `elev` es real (media de bloques del DEM de USGS); `slope` y `obstacle` son derivadas. No tiene `thermal`. Ver sección 4. |
+| Mapas base THEMIS diurno y nocturno | `layers.js` (`themisDay`, `themisNight`) | real | Imágenes infrarrojas de Mars Odyssey. No son temperaturas ni valores térmicos. Ver sección 3. |
+| Malla de elevación real | `src/data/grid.json` (`gridFromJson`) | real / derived | Es la malla que usa la app. `elev` es real (media de bloques del DEM de USGS); `slope` y `obstacle` son derivadas. No tiene `thermal`. Ver sección 5. |
 | Capa "Pendiente (DEM USGS, 25 m)" | `layers.js` (`slope`) | derived | Pendiente calculada de la malla real. |
 | Capa "Sin datos del DEM" | `layers.js` (`obstacle`) | derived | Celdas sin elevación válida (hoy ninguna). No es un mapa de rocas. |
 | Malla sintética | `grid.js` (`generateGrid`) | synthetic | Ruido sinusoidal. Ya no la usa la app; se conserva para pruebas. |
@@ -58,7 +59,39 @@ Limitaciones:
 - **Resolución:** el DEM de 128 píxeles por grado tiene unos 463 m por píxel en el ecuador ([USGS](https://astrogeology.usgs.gov/search/map/mars_mgs_mola_dem_463m)). La incertidumbre total de elevación indicada ahí es de al menos ±3 m.
 - **Limitación:** nuestra caja de 5.9 km contiene unas 13×13 muestras de MOLA, así que no sirve para planificar la ruta. Solo sirve como referencia vertical regional.
 
-## 3. DEM de referencia: MSL Gale Merged DEM 1 m (USGS)
+## 3. THEMIS infrarrojo (NASA Mars Trek)
+
+Dos mosaicos de la cámara THEMIS de la misión Mars Odyssey, servidos por Mars Trek. Se activan desde el panel de capas como mapas base, igual que Viking o MOLA. CTX sigue siendo el mapa recomendado para la zona de trabajo.
+
+| | Diurno | Nocturno |
+|---|---|---|
+| Identificador | `THEMIS_DayIR_ControlledMosaics_100m_v2_oct2018` | `THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018` |
+| Capabilities | [XML](https://trek.nasa.gov/tiles/Mars/EQ/THEMIS_DayIR_ControlledMosaics_100m_v2_oct2018/1.0.0/WMTSCapabilities.xml) | [XML](https://trek.nasa.gov/tiles/Mars/EQ/THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018/1.0.0/WMTSCapabilities.xml) |
+| Plantilla de tile | `https://trek.nasa.gov/tiles/Mars/EQ/<identificador>/1.0.0//default/default028mm/{z}/{y}/{x}.png` | igual |
+
+Datos verificados en las capabilities y con peticiones reales (14-11-2026):
+- **Servicio:** WMTS RESTful, estilo `default`, `TileMatrixSet` `default028mm`, PNG de 256×256 en escala de grises con canal alfa.
+- **CRS:** `urn:ogc:def:crs:EPSG::104905`, el mismo que CTX. El nivel 0 tiene 2×1 tiles y el origen está arriba a la izquierda en (-180, 90), igual que `L.CRS.EPSG4326` de Leaflet. En la app se ve alineado con CTX y con la malla del DEM.
+- **Cobertura:** longitud -179.9999997 a 179.9998849, latitud -65.0006576 a 65.0007535. Gale (4.75° S) queda dentro. En `layers.js` están como `bounds`.
+- **Zoom:** niveles 0 a 9. El 9 responde 200 y el 10 responde 404. En el nivel 9 un píxel del tile equivale a unos 81 m en el ecuador (calculado a partir de la malla). El producto es de 100 m/px, de modo que el nivel 9 ya es la resolución completa.
+- **Nuestra zona:** la caja de 5.9 km cabe en un único tile del nivel 9 (fila 269, columna 902), unos 73 píxeles de lado. A más zoom la imagen se amplía sin añadir detalle.
+- **Cabeceras:** `Access-Control-Allow-Origin: *`.
+- **Carga real:** en el navegador cargaron los 6 tiles del nivel 9 de cada producto, sin errores. Un tile del nivel 9 de cada uno se descargó y se comprobó visualmente: coherente con el terreno de Gale.
+
+Qué son (según USGS Astrogeology):
+- Mosaicos controlados de THEMIS a 100 m/px entre ±65° de latitud, formados con la banda 9 del infrarrojo térmico (12.57 µm) en la versión de teselas de USGS (`ProductVersionId` 2 en una etiqueta de ejemplo). Los productos son de 8 bits, es decir, **cualitativos**.
+- El instrumento THEMIS tiene 9 bandas de infrarrojo térmico y 5 visibles y cercanas al infrarrojo (Christensen et al., 2004).
+- Procedencia: [mosaicos controlados de THEMIS en USGS](https://astrogeology.usgs.gov/search/map/mars_themis_day_ir_controlled_mosaic_sinus_sabaeus_30s_00e_100_mpp), [descripción STAC](https://stac.astrogeology.usgs.gov/docs/data/mars/themis_controlled_mosaics/), [ASU](https://www.mars.asu.edu/data/thm_dir_100m), [Christensen et al. 2004](https://lpl.arizona.edu/hamilton/sites/lpl.arizona.edu.hamilton/files/courses/ptys551/Chapters/Christensen_et_al_2004.pdf).
+
+Limitaciones:
+- **No son temperaturas.** Las imágenes de 8 bits se han estirado en contraste; el gris de un píxel no se puede convertir en grados Celsius ni en Kelvin. Tampoco son inercia térmica, que es otro producto (ver sección 6).
+- **No hay valores numéricos en la app:** no se ha creado ningún campo `thermal`, y A* no usa estas imágenes. La penalización por suelo suelto sigue desactivada.
+- Es una imagen de brillo infrarrojo: mezcla temperatura de la superficie con la influencia de la topografía y la hora del día. La lectura cualitativa (zonas más claras u oscuras) depende de la hora de observación y de la estación; esa información no está en los tiles.
+- El diurno y el nocturno son mosaicos de muchas pasadas: se ven costuras entre tiles con distinto brillo.
+- A 100 m/px la caja de trabajo son unos 59 píxeles de lado, así que la imagen no distingue detalles del tamaño de un rover.
+- No se ha confirmado a qué versión exacta corresponde cada mosaico de Trek (`v2_oct2018` es el nombre del producto), ni las fechas de las imágenes que contiene.
+
+## 4. DEM de referencia: MSL Gale Merged DEM 1 m (USGS)
 
 - **Página:** <https://astrogeology.usgs.gov/search/map/mars_msl_gale_merged_dem_1m>
 - **Archivo:** <https://planetarymaps.usgs.gov/mosaic/Mars/MSL/MSL_Gale_DEM_Mosaic_1m_v3.tif>
@@ -89,9 +122,9 @@ Metadatos leídos de la cabecera del GeoTIFF (1 273 bytes leídos, 14-11-2026):
 - **Prueba:** se decodificó la fila 36773 (latitud -4.75) con Pillow. Las 5929 columnas de la caja tienen datos, entre -4213.6 y -3758.4 m.
 - **Limitación:** es un mosaico de DEM de distinto origen remuestreado a 1 m. El detalle real depende de qué instrumento cubre cada zona; que la cuadrícula sea de 1 m no significa que haya 1 m de detalle en todas partes.
 
-## 4. Malla de elevación real (`src/data/grid.json`)
+## 5. Malla de elevación real (`src/data/grid.json`)
 
-Generada con `scripts/extract_dem_grid.py` el 14-11-2026 a partir del DEM de la sección 3.
+Generada con `scripts/extract_dem_grid.py` el 14-11-2026 a partir del DEM de la sección 4.
 
 **Cómo se ejecuta.** Necesita Python 3 con numpy y Pillow; no usa GDAL. En este equipo Python no está en el PATH:
 
@@ -148,11 +181,11 @@ node scripts/check_grid.mjs
 - Las distancias usan la esfera de radio 3396.19 km del propio DEM, no un elipsoide.
 - La base y los waypoints siguen siendo posiciones sintéticas. Que caigan en celdas transitables no valida su interés científico.
 
-## 5. Pendiente (no integrado)
+## 6. Pendiente (no integrado)
 
-- **THEMIS:** mosaicos de inercia térmica de unos 100 m/px, entre ±60° de latitud, en teselas de 30°×60° ([ejemplo en USGS](https://astrogeology.usgs.gov/search/map/themis_thermal_inertia_mosaic_quantitative_30s060e_100mpp)). Precisión absoluta indicada: unos 20 %. Hace falta localizar la tesela que cubre 137.4° E, -4.75° N.
+- **THEMIS cuantitativo:** los mosaicos de inercia térmica de unos 100 m/px, entre ±60° de latitud, en teselas de 30°×60° ([ejemplo en USGS](https://astrogeology.usgs.gov/search/map/themis_thermal_inertia_mosaic_quantitative_30s060e_100mpp)), tienen versión cuantitativa y cualitativa. Precisión absoluta indicada: unos 20 %. Es el único producto de la lista que podría dar un valor numérico para `thermal`. Hace falta localizar la tesela que cubre 137.4° E, -4.75° N y leer solo nuestra ventana, como se hizo con el DEM. Todavía no se ha comprobado.
 - **HiRISE:** recortes de imagen o DTM propios de la caja. Sin comprobar.
-- **Geología y minerales:** no hay ninguna capa real. La capa `geology` (apuntaba a un `geology.png` que no existe) y la capa térmica se retiraron de `layers.js`. La térmica se volverá a añadir cuando haya datos de THEMIS.
+- **Geología y minerales:** no hay ninguna capa real. La capa `geology` (apuntaba a un `geology.png` que no existe) y la capa térmica se retiraron de `layers.js`. Una capa térmica con valores solo se añadirá cuando haya un producto cuantitativo de THEMIS leído y verificado; las imágenes de la sección 3 no sirven para eso.
 
 ## Integración en la app
 
@@ -171,7 +204,14 @@ Resultados con la malla real y los 4 puntos (`node scripts/check_grid.mjs` y com
 
 Los avisos vienen de los límites de `LIMITS`, que son supuestos de diseño.
 
-Pendiente en el frontend:
-- La app sigue abriendo con Viking (`useState('viking')` en `App.jsx`). La capa CTX está disponible en el panel.
-- En `styles.css`, la regla `.legend span{width:12px;height:12px}` choca con el marcado de las leyendas de `LayerPanel.jsx`, y los textos se solapan.
-- En la lista de puntos, hacer clic en el nombre también marca o desmarca la casilla, porque está dentro del mismo `<label>`.
+Resuelto en el rediseño de la interfaz (14-11-2026):
+- La app abre con CTX (`recommendedBaseId` en `App.jsx`).
+- Las leyendas del panel de capas ya no se solapan.
+- En la lista de paradas, la casilla incluye o quita la parada y el nombre solo despliega su detalle.
+- El panel muestra la procedencia de cada capa con las etiquetas Real, Derivado y Simulado, tomadas del campo `provenance`.
+
+Valores que la interfaz marca como estimados o simulados:
+- Tiempo de EVA, dosis y sus límites: salen de `LIMITS`, que son supuestos de diseño.
+- El oxígeno del HUD es una fórmula de demostración, sin modelo real.
+- El aviso de "punto de no retorno" del HUD se activa al 70 % del límite de EVA o de dosis; es una regla de demostración.
+- El rumbo del HUD se calcula entre la posición simulada y la siguiente parada, con las coordenadas de la ruta.
