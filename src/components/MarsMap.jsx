@@ -1,12 +1,52 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import L from 'leaflet';
-import { MapContainer, TileLayer, ImageOverlay, Polyline, CircleMarker, Tooltip, Rectangle } from 'react-leaflet';
+import { MapContainer, TileLayer, ImageOverlay, Polyline, Marker, Tooltip, Rectangle, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
 import { AREA, BASE } from '../data/mission.js';
 import { LAYERS } from '../data/layers.js';
-import { layerToImage } from '../lib/grid.js';
+import { layerToImage, latLonToCell } from '../lib/grid.js';
+import { formatLatLon, formatNumber } from '../lib/format.js';
+
+const baseIcon = L.divIcon({ className: 'map-pin map-pin-base', html: 'B', iconSize: [28, 28] });
+
+function stopIcon(number, isSelected) {
+  const className = `map-pin map-pin-stop${isSelected ? ' is-selected' : ''}`;
+  return L.divIcon({ className, html: String(number), iconSize: [28, 28] });
+}
+
+function ResizeWatcher() {
+  const map = useMap();
+  useEffect(() => {
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
+  return null;
+}
+
+function CursorReadout({ grid }) {
+  const [point, setPoint] = useState(null);
+  useMapEvents({ mousemove: (event) => setPoint(event.latlng), mouseout: () => setPoint(null) });
+  if (!point) return null;
+
+  const [[south, west], [north, east]] = grid.bounds;
+  const isInside = point.lat > south && point.lat < north && point.lng > west && point.lng < east;
+  let elevation = NaN;
+  if (isInside) {
+    const [row, col] = latLonToCell(grid, point.lat, point.lng);
+    elevation = grid.elev[row * grid.cols + col];
+  }
+
+  return (
+    <div className="map-readout">
+      <span>{formatLatLon(point.lat, point.lng)}</span>
+      {Number.isFinite(elevation) && <span>{formatNumber(elevation)} m (DEM)</span>}
+    </div>
+  );
+}
 
 export default function MarsMap({ grid, baseId, layerState, waypoints, route, selected, onSelect }) {
-  // Convierte las capas tipo "grid" en imágenes (solo una vez)
+  const [isLoading, setIsLoading] = useState(false);
+
   const gridImgs = useMemo(() => Object.fromEntries(
     LAYERS.filter(l => l.type === 'grid' && grid[l.key]).map(l => [l.id, layerToImage(grid, l.key, l.color)])
   ), [grid]);
@@ -31,24 +71,35 @@ export default function MarsMap({ grid, baseId, layerState, waypoints, route, se
   };
 
   return (
-    <MapContainer crs={L.CRS.EPSG4326} center={AREA.center} zoom={11} minZoom={2} maxZoom={14} className="map">
-      <TileLayer key={base.id} url={base.url} maxNativeZoom={base.maxNativeZoom} bounds={base.bounds} noWrap attribution={base.source} />
+    <MapContainer crs={L.CRS.EPSG4326} bounds={AREA.bounds} boundsOptions={{ padding: [48, 48] }}
+      minZoom={2} maxZoom={14} zoomControl={false} className="map">
+      <ZoomControl position="topright" zoomInTitle="Acercar" zoomOutTitle="Alejar" />
+      <ResizeWatcher />
+      <TileLayer key={base.id} url={base.url} maxNativeZoom={base.maxNativeZoom} bounds={base.bounds} noWrap
+        attribution={base.source}
+        eventHandlers={{ loading: () => setIsLoading(true), load: () => setIsLoading(false) }} />
 
       {LAYERS.filter(l => l.type !== 'tile').map(renderLayer)}
 
-      <Rectangle bounds={grid.bounds} pathOptions={{ color: '#ff7a3d', weight: 1, fill: false, dashArray: '4' }} />
-      {route?.latlngs && <Polyline positions={route.latlngs} pathOptions={{ color: '#00e5ff', weight: 4 }} />}
+      <Rectangle bounds={grid.bounds} interactive={false}
+        pathOptions={{ color: '#e8743b', weight: 1, fill: false, dashArray: '5 4' }} />
+      {route?.latlngs && <>
+        <Polyline positions={route.latlngs} interactive={false} pathOptions={{ color: '#0b1017', weight: 8, opacity: 0.8 }} />
+        <Polyline positions={route.latlngs} interactive={false} pathOptions={{ color: '#6ccadb', weight: 4 }} />
+      </>}
 
-      <CircleMarker center={[BASE.lat, BASE.lon]} radius={9} pathOptions={{ color: '#fff', fillColor: '#ff7a3d', fillOpacity: 1 }}>
-        <Tooltip permanent direction="top">Base</Tooltip>
-      </CircleMarker>
-      {waypoints.map((w, i) => (
-        <CircleMarker key={w.id} center={[w.lat, w.lon]} radius={selected === w.id ? 10 : 7}
-          eventHandlers={{ click: () => onSelect(w.id) }}
-          pathOptions={{ color: '#fff', fillColor: '#ffd23d', fillOpacity: 1 }}>
-          <Tooltip permanent direction="right">{i + 1}. {w.name}</Tooltip>
-        </CircleMarker>
+      <Marker position={[BASE.lat, BASE.lon]} icon={baseIcon}>
+        <Tooltip direction="top" offset={[0, -14]}>{BASE.name}</Tooltip>
+      </Marker>
+      {waypoints.map(w => (
+        <Marker key={w.id} position={[w.lat, w.lon]} icon={stopIcon(w.number, selected === w.id)}
+          eventHandlers={{ click: () => onSelect(w.id) }}>
+          <Tooltip direction="top" offset={[0, -14]}>{w.number}. {w.name}</Tooltip>
+        </Marker>
       ))}
+
+      <CursorReadout grid={grid} />
+      {isLoading && <div className="map-loading" role="status">Cargando imágenes…</div>}
     </MapContainer>
   );
 }
