@@ -8,7 +8,7 @@ import { layerToImage } from '../lib/grid.js';
 export default function MarsMap({ grid, baseId, layerState, waypoints, route, selected, onSelect }) {
   // Convierte las capas tipo "grid" en imágenes (solo una vez)
   const gridImgs = useMemo(() => Object.fromEntries(
-    LAYERS.filter(l => l.type === 'grid').map(l => [l.id, layerToImage(grid, l.key, l.color)])
+    LAYERS.filter(l => l.type === 'grid' && grid[l.key]).map(l => [l.id, layerToImage(grid, l.key, l.color)])
   ), [grid]);
 
   const base = LAYERS.find(l => l.id === baseId);
@@ -18,6 +18,7 @@ export default function MarsMap({ grid, baseId, layerState, waypoints, route, se
     if (!st?.visible) return null;
     switch (l.type) {
       case 'grid':
+        if (!gridImgs[l.id]) return null;
         return <ImageOverlay key={l.id} url={gridImgs[l.id]} bounds={grid.bounds} opacity={st.opacity} className="pixel" />;
       case 'image':
         return <ImageOverlay key={l.id} url={l.url} bounds={l.bounds} opacity={st.opacity} />;
@@ -31,7 +32,7 @@ export default function MarsMap({ grid, baseId, layerState, waypoints, route, se
 
   return (
     <MapContainer crs={L.CRS.EPSG4326} center={AREA.center} zoom={11} minZoom={2} maxZoom={14} className="map">
-      <TileLayer key={base.id} url={base.url} maxNativeZoom={base.maxNativeZoom} noWrap attribution={base.source} />
+      <TileLayer key={base.id} url={base.url} maxNativeZoom={base.maxNativeZoom} bounds={base.bounds} noWrap attribution={base.source} />
 
       {LAYERS.filter(l => l.type !== 'tile').map(renderLayer)}
 

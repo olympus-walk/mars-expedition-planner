@@ -7,13 +7,13 @@ export const AREA = {
   center: [-4.75, 137.38],
 };
 
-export const BASE = { id: 'base', name: 'Rover / Base', lat: -4.785, lon: 137.345, type: 'base' };
+export const BASE = { id: 'base', name: 'Rover / Base', lat: -4.785, lon: 137.345, type: 'base', provenance: 'synthetic' };
 
 export const WAYPOINTS = [
-  { id: 'w1', name: 'Boxwork A', lat: -4.770, lon: 137.360, task: 'Muestrear vetas de sulfato de calcio en crestas', photo: '' },
-  { id: 'w2', name: 'Boxwork B', lat: -4.748, lon: 137.378, task: 'Fotografía de contexto y medición de altura de crestas', photo: '' },
-  { id: 'w3', name: 'Contacto arcilla-sulfato', lat: -4.728, lon: 137.395, task: 'Muestra de transición de unidades', photo: '' },
-  { id: 'w4', name: 'Mirador', lat: -4.715, lon: 137.412, task: 'Panorámica y reconocimiento de la siguiente salida', photo: '' },
+  { id: 'w1', name: 'Boxwork A', lat: -4.770, lon: 137.360, task: 'Muestrear vetas de sulfato de calcio en crestas', photo: '', provenance: 'synthetic' },
+  { id: 'w2', name: 'Boxwork B', lat: -4.748, lon: 137.378, task: 'Fotografía de contexto y medición de altura de crestas', photo: '', provenance: 'synthetic' },
+  { id: 'w3', name: 'Contacto arcilla-sulfato', lat: -4.728, lon: 137.395, task: 'Muestra de transición de unidades', photo: '', provenance: 'synthetic' },
+  { id: 'w4', name: 'Mirador', lat: -4.715, lon: 137.412, task: 'Panorámica y reconocimiento de la siguiente salida', photo: '', provenance: 'synthetic' },
 ];
 // photo: pegar URL de imagen cruda de Curiosity (mars.nasa.gov/msl/multimedia/raw-images/)
 

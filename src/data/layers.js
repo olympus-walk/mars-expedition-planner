@@ -10,20 +10,32 @@
 //
 // Grupos: base, terreno, geologia, seguridad, mision
 // El orden de la lista = orden de dibujo (la última queda encima)
+//
+// provenance indica el origen de los datos:
+//   real      → producto científico publicado (ver docs/data-sources.md)
+//   derived   → calculado a partir de datos reales
+//   synthetic → generado para demostración, no es ciencia
 // ═══════════════════════════════════════════════════════════
 
 const T = 'https://trek.nasa.gov/tiles/Mars/EQ';
 
-// Bordes de la zona de trabajo (los mismos de mission.js)
-const ZONA = [[-4.80, 137.33], [-4.70, 137.43]];
-
 export const LAYERS = [
   // ───────── MAPAS BASE ─────────
+  {
+    id: 'ctxGale', group: 'base', type: 'tile',
+    name: 'Óptica · CTX Gale (detalle)',
+    url: `${T}/Gale_CTX_BlockAdj_dd/1.0.0//default/default028mm/{z}/{y}/{x}.png`,
+    maxNativeZoom: 12,
+    bounds: [[-6.5732988, 135.1842593], [-2.8077809, 139.2413012]],
+    provenance: 'real',
+    source: 'NASA/JPL Mars Trek · MRO CTX',
+  },
   {
     id: 'viking', group: 'base', type: 'tile',
     name: 'Óptica · Viking color',
     url: `${T}/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0//default/default028mm/{z}/{y}/{x}.jpg`,
     maxNativeZoom: 7,
+    provenance: 'real',
     source: 'NASA/JPL Mars Trek',
   },
   {
@@ -31,41 +43,28 @@ export const LAYERS = [
     name: 'Topografía · MOLA',
     url: `${T}/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/{z}/{y}/{x}.jpg`,
     maxNativeZoom: 6,
-    source: 'NASA/JPL Mars Trek',
+    provenance: 'real',
+    source: 'NASA/JPL Mars Trek · MOLA relieve coloreado',
   },
 
   // ───────── TERRENO (calculadas en grid.js) ─────────
   {
     id: 'slope', group: 'terreno', type: 'grid', key: 'slope',
-    name: 'Pendiente', visible: true, opacity: 0.6,
+    name: 'Pendiente (DEM USGS, 25 m)', visible: true, opacity: 0.6,
     color: (s) => s > 25 ? [220, 30, 30, 200] : s > 15 ? [255, 140, 0, 170] : [40, 200, 120, 90],
     legend: [['#28c878', '≤15°'], ['#ff8c00', '15–25°'], ['#dc1e1e', '>25°']],
-    source: 'Derivada del DTM',
-  },
-  {
-    id: 'thermal', group: 'terreno', type: 'grid', key: 'thermal',
-    name: 'Térmica (firmeza del suelo)', visible: false, opacity: 0.5,
-    color: (t) => [Math.round(255 * (1 - t)), 120, Math.round(255 * t), 150],
-    legend: [['#ff7896', 'Polvo suelto'], ['#0078ff', 'Roca firme']],
-    source: 'THEMIS (pendiente de conectar)',
-  },
-
-  // ───────── GEOLOGÍA (imágenes) ─────────
-  {
-    id: 'geology', group: 'geologia', type: 'image',
-    name: 'Unidades geológicas', visible: false, opacity: 0.5,
-    url: '/layers/geology.png',   // archivo en public/layers/
-    bounds: ZONA,
-    source: 'USGS Astrogeology',
+    provenance: 'derived',
+    source: 'Derivada del MSL Gale Merged DEM 1m (USGS), media en celdas de 25 m',
   },
 
   // ───────── SEGURIDAD ─────────
   {
     id: 'obstacle', group: 'seguridad', type: 'grid', key: 'obstacle',
-    name: 'Obstáculos', visible: true, opacity: 1,
+    name: 'Sin datos del DEM', visible: true, opacity: 1,
     color: (o) => o ? [0, 0, 0, 220] : [0, 0, 0, 0],
-    legend: [['#000', 'Roca / bloqueo']],
-    source: 'Derivada del DTM',
+    legend: [['#000', 'Sin elevación']],
+    provenance: 'derived',
+    source: 'Celdas sin elevación válida en el DEM de USGS. No es un mapa de rocas',
   },
 
   // ───────── MISIÓN ─────────
@@ -76,15 +75,8 @@ export const LAYERS = [
     positions: [  // ⚠️ coordenadas de ejemplo: reemplazar por las reales
       [-4.795, 137.335], [-4.780, 137.350], [-4.765, 137.368], [-4.750, 137.385],
     ],
-    source: 'NASA/JPL-Caltech',
-  },
-
-    {
-    id: 'minerals', group: 'geologia', type: 'image',
-    name: 'Minerales (CRISM)', visible: false, opacity: 0.5,
-    url: '/layers/minerales.webp',
-    bounds: ZONA,   // ⚠️ provisional: reemplazar por las coordenadas reales de la imagen
-    source: 'CRISM / Mars Trek',
+    provenance: 'synthetic',
+    source: 'Ejemplo ilustrativo. No es la ruta real de Curiosity',
   },
 ];
 

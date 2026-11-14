@@ -2,14 +2,15 @@ import React, { useMemo, useState } from 'react';
 import MarsMap from './components/MarsMap.jsx';
 import Profile from './components/Profile.jsx';
 import HUD from './components/HUD.jsx';
-import { generateGrid } from './lib/grid.js';
+import { gridFromJson } from './lib/grid.js';
 import { planRoute } from './lib/astar.js';
 import { AREA, BASE, WAYPOINTS, LIMITS } from './data/mission.js';
 import { initialLayerState } from './data/layers.js';
+import demData from './data/grid.json';
 import LayerPanel from './components/LayerPanel.jsx';
 
 export default function App() {
-  const grid = useMemo(() => generateGrid(), []);
+  const grid = useMemo(() => gridFromJson(demData), []);
   const [mode, setMode] = useState('walk');
   const [pair, setPair] = useState(true);
   const [baseId, setBaseId] = useState('viking');
@@ -31,7 +32,9 @@ export default function App() {
       <aside className="panel">
         <h1>AREO‑WALK <small>Marswalk Planner</small></h1>
         <p className="muted">{AREA.name}</p>
-        {grid.synthetic && <p className="warn">Terreno de ejemplo (sintético) — reemplazar por grid.json del HiRISE DTM</p>}
+        {grid.synthetic
+          ? <p className="warn">Terreno de ejemplo (sintético) — reemplazar por grid.json del HiRISE DTM</p>
+          : <p className="muted">Terreno: {grid.meta.product}, malla de {grid.meta.cellSizeNorthSouthM} m</p>}
 
         <section><h3>1 · Misión</h3>
           <div className="row">
@@ -49,6 +52,7 @@ export default function App() {
           {WAYPOINTS.map((w, i) => (
             <label key={w.id} className="wp"><input type="checkbox" checked={active.includes(w.id)} onChange={() => toggle(w.id)} />
               <span onClick={() => setSelected(w.id)}>{i + 1}. {w.name}</span></label>))}
+          <p className="warn">Puntos y base aproximados, sin validar. La ruta solo respeta la pendiente máxima a 25 m: no garantiza que el terreno sea seguro.</p>
           <button className="primary" onClick={calc}>Calcular ruta segura (A*)</button>
         </section>
 

@@ -4,8 +4,9 @@ import { latLonToCell, cellToLatLon, cellSizeKm } from './grid.js';
 export function cellCost(g, i, maxSlope) {
   if (g.obstacle[i]) return Infinity;
   const s = g.slope[i];
-  if (s > maxSlope) return Infinity;
-  return 1 + (s / maxSlope) * 2 + (1 - g.thermal[i]) * 1.5;
+  if (!Number.isFinite(s) || s > maxSlope) return Infinity;
+  const looseSoil = g.thermal ? (1 - g.thermal[i]) * 1.5 : 0;
+  return 1 + (s / maxSlope) * 2 + looseSoil;
 }
 
 export function astar(g, from, to, maxSlope) {
