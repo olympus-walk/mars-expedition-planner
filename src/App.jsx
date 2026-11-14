@@ -7,6 +7,7 @@ import { planRoute } from './lib/astar.js';
 import { AREA, BASE, WAYPOINTS, LIMITS } from './data/mission.js';
 import { initialLayerState } from './data/layers.js';
 import LayerPanel from './components/LayerPanel.jsx';
+import Welcome from './components/Welcome.jsx';
 
 export default function App() {
   const grid = useMemo(() => generateGrid(), []);
@@ -18,18 +19,21 @@ export default function App() {
   const [selected, setSelected] = useState(null);
   const [route, setRoute] = useState(null);
   const [hud, setHud] = useState(false);
+  const [inicio, setInicio] = useState(true);
 
   const wps = WAYPOINTS.filter(w => active.includes(w.id));
   const sel = WAYPOINTS.find(w => w.id === selected);
   const calc = () => setRoute(planRoute(grid, BASE, wps, mode, LIMITS));
   const toggle = (id) => { setActive(a => a.includes(id) ? a.filter(x => x !== id) : [...a, id]); setRoute(null); };
 
+  if (inicio) return <Welcome onStart={() => setInicio(false)} />;
   if (hud) return <HUD route={route} waypoints={wps} limits={LIMITS} onExit={() => setHud(false)} />;
 
   return (
     <div className="app">
       <aside className="panel">
         <h1>AREO‑WALK <small>Marswalk Planner</small></h1>
+        <button type="button" onClick={() => setInicio(true)}>← Inicio</button>
         <p className="muted">{AREA.name}</p>
         {grid.synthetic && <p className="warn">Terreno de ejemplo (sintético) — reemplazar por grid.json del HiRISE DTM</p>}
 
