@@ -60,10 +60,9 @@ export default function App() {
   const toggle = (id) => { setActive(a => a.includes(id) ? a.filter(x => x !== id) : [...a, id]); setRoute(null); };
   const changeMode = (key) => { setMode(key); setRoute(null); };
 
-  if (hud) return <HUD route={route} stops={stopNumbers} limits={LIMITS} onExit={() => setHud(false)} />;
-
   return (
-    <div className={`app${panelOpen ? ' panel-open' : ''}`}>
+    <>
+    <div className={`app${panelOpen ? ' panel-open' : ''}${hud ? ' is-covered' : ''}`}>
       <header className="topbar">
         <button ref={menuButton} className="button button-icon" onClick={() => setPanelOpen(true)}
           aria-label="Abrir panel de planificación" aria-expanded={panelOpen}>
@@ -78,22 +77,17 @@ export default function App() {
         <header className="brand">
           <div>
             <h1>Olympus Walk</h1>
-            <p>AREO-WALK, planificador de expediciones en Marte</p>
+            <p>Planificador de expediciones en Marte</p>
           </div>
           <button ref={closeButton} className="button button-icon panel-close" onClick={closePanel} aria-label="Cerrar panel">
             <Icon name="close" />
           </button>
         </header>
 
-        <div className="site">
-          <p className="site-name">{AREA.name}</p>
-          {grid.synthetic
-            ? <p className="status status-warn"><Icon name="alert" size={16} />Terreno de ejemplo (sintético)</p>
-            : <p>Terreno: {grid.meta.product}, malla de {grid.meta.cellSizeNorthSouthM} m</p>}
-        </div>
+        <p className="site">{AREA.name}</p>
 
         <section>
-          <h2>Modo de desplazamiento</h2>
+          <h2>Modo de exploración</h2>
           <div className="segmented">
             {['walk', 'rover'].map(key => (
               <button key={key} aria-pressed={mode === key} onClick={() => changeMode(key)}>
@@ -102,7 +96,7 @@ export default function App() {
             ))}
           </div>
           <p className="note">
-            Pendiente máxima {LIMITS[mode].maxSlope}° y {LIMITS[mode].speedKmh} km/h. Son supuestos de diseño, no valores validados.
+            Hasta {LIMITS[mode].maxSlope}° de pendiente, a {LIMITS[mode].speedKmh} km/h (supuestos de diseño).
           </p>
         </section>
 
@@ -129,9 +123,9 @@ export default function App() {
               );
             })}
           </ul>
-          <p className="status status-warn">
-            <Icon name="alert" size={16} />
-            <span>Puntos y base aproximados, sin validar. La ruta solo respeta la pendiente máxima a 25 m: no garantiza que el terreno sea seguro.</span>
+          <p className="caution">
+            <Icon name="alert" size={18} />
+            <span>Base y paradas aproximadas, sin validar. La ruta solo respeta la pendiente máxima en celdas de 25 m: no garantiza que el terreno sea seguro.</span>
           </p>
           <button className="button button-primary" onClick={calc} disabled={!wps.length}>Calcular ruta</button>
         </section>
@@ -142,9 +136,19 @@ export default function App() {
             recommendedId={recommendedBaseId} />
         </section>
 
-        <footer className="credits">
-          Imágenes: NASA/JPL Mars Trek (CTX, THEMIS, MOLA, Viking). Elevación: USGS Astrogeology.
-        </footer>
+        <section>
+          <h2>Datos de la misión</h2>
+          <dl className="facts">
+            <div>
+              <dt>Terreno</dt>
+              <dd>{grid.synthetic ? 'De ejemplo (sintético)' : `${grid.meta.product}, malla de ${grid.meta.cellSizeNorthSouthM} m`}</dd>
+            </div>
+            <div><dt>Imágenes</dt><dd>NASA/JPL Mars Trek (CTX, THEMIS, MOLA, Viking)</dd></div>
+            <div><dt>Límite de EVA</dt><dd>{LIMITS.maxEvaHours} h</dd></div>
+            <div><dt>Límite de dosis</dt><dd>{LIMITS.maxEvaDoseMicroGy} µGy</dd></div>
+          </dl>
+          <p className="note">Los límites y las velocidades son supuestos de diseño, sin validar.</p>
+        </section>
       </aside>
 
       <main>
@@ -158,5 +162,7 @@ export default function App() {
         )}
       </main>
     </div>
+    {hud && <HUD route={route} stops={stopNumbers} limits={LIMITS} onExit={() => setHud(false)} />}
+    </>
   );
 }

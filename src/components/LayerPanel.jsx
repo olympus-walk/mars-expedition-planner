@@ -1,7 +1,9 @@
 import React from 'react';
-import { LAYERS, GROUPS } from '../data/layers.js';
+import { LAYERS } from '../data/layers.js';
 
 const provenanceLabels = { real: 'Real', derived: 'Derivado', synthetic: 'Simulado' };
+const baseLayers = LAYERS.filter(l => l.type === 'tile');
+const overlays = LAYERS.filter(l => l.type !== 'tile');
 
 function ProvenanceTag({ value }) {
   if (!provenanceLabels[value]) return null;
@@ -18,10 +20,10 @@ export default function LayerPanel({ baseId, setBaseId, state, setState, recomme
         <input type="radio" name="base" checked={checked} onChange={() => setBaseId(layer.id)} />
         <span className="option-body">
           <span className="option-title">{layer.name}</span>
-          {layer.id === recommendedId && <span className="option-hint">Recomendado para la zona de trabajo</span>}
-          {checked && <span className="option-source">{layer.source}</span>}
+          <span className="option-source">{layer.detail}, {layer.resolution}</span>
         </span>
-        <ProvenanceTag value={layer.provenance} />
+        {layer.id === recommendedId && <span className="option-hint">Recomendada</span>}
+        {layer.provenance !== 'real' && <ProvenanceTag value={layer.provenance} />}
       </label>
     );
   };
@@ -59,16 +61,14 @@ export default function LayerPanel({ baseId, setBaseId, state, setState, recomme
 
   return (
     <div className="layers">
-      {Object.entries(GROUPS).map(([groupId, groupName]) => {
-        const items = LAYERS.filter(l => l.group === groupId);
-        if (!items.length) return null;
-        return (
-          <fieldset key={groupId} className="layer-group">
-            <legend>{groupName}</legend>
-            {items.map(l => l.type === 'tile' ? renderBase(l) : renderOverlay(l))}
-          </fieldset>
-        );
-      })}
+      <fieldset className="layer-group">
+        <legend>Mapa base <ProvenanceTag value="real" /></legend>
+        {baseLayers.map(renderBase)}
+      </fieldset>
+      <fieldset className="layer-group">
+        <legend>Sobre el mapa</legend>
+        {overlays.map(renderOverlay)}
+      </fieldset>
     </div>
   );
 }

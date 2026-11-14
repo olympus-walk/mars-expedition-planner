@@ -23,7 +23,7 @@ export const LAYERS = [
   // ───────── MAPAS BASE ─────────
   {
     id: 'ctxGale', group: 'base', type: 'tile',
-    name: 'Óptica · CTX Gale (detalle)',
+    name: 'CTX de Gale', detail: 'Imagen óptica', resolution: '10 m/px',
     url: `${T}/Gale_CTX_BlockAdj_dd/1.0.0//default/default028mm/{z}/{y}/{x}.png`,
     maxNativeZoom: 12,
     bounds: [[-6.5732988, 135.1842593], [-2.8077809, 139.2413012]],
@@ -32,7 +32,7 @@ export const LAYERS = [
   },
   {
     id: 'viking', group: 'base', type: 'tile',
-    name: 'Óptica · Viking color',
+    name: 'Viking en color', detail: 'Imagen óptica', resolution: '232 m/px',
     url: `${T}/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0//default/default028mm/{z}/{y}/{x}.jpg`,
     maxNativeZoom: 7,
     provenance: 'real',
@@ -40,7 +40,7 @@ export const LAYERS = [
   },
   {
     id: 'mola', group: 'base', type: 'tile',
-    name: 'Topografía · MOLA',
+    name: 'MOLA', detail: 'Relieve coloreado', resolution: '463 m/px',
     url: `${T}/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/{z}/{y}/{x}.jpg`,
     maxNativeZoom: 6,
     provenance: 'real',
@@ -48,7 +48,7 @@ export const LAYERS = [
   },
   {
     id: 'themisDay', group: 'base', type: 'tile',
-    name: 'Infrarrojo · THEMIS diurno (100 m)',
+    name: 'THEMIS diurno', detail: 'Infrarrojo, no es temperatura', resolution: '100 m/px',
     url: `${T}/THEMIS_DayIR_ControlledMosaics_100m_v2_oct2018/1.0.0//default/default028mm/{z}/{y}/{x}.png`,
     maxNativeZoom: 9,
     bounds: [[-65.0006576, -179.9999997], [65.0007535, 179.9998849]],
@@ -57,7 +57,7 @@ export const LAYERS = [
   },
   {
     id: 'themisNight', group: 'base', type: 'tile',
-    name: 'Infrarrojo · THEMIS nocturno (100 m)',
+    name: 'THEMIS nocturno', detail: 'Infrarrojo, no es temperatura', resolution: '100 m/px',
     url: `${T}/THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018/1.0.0//default/default028mm/{z}/{y}/{x}.png`,
     maxNativeZoom: 9,
     bounds: [[-65.0006576, -179.9999997], [65.0007535, 179.9998849]],
@@ -69,8 +69,8 @@ export const LAYERS = [
   {
     id: 'slope', group: 'terreno', type: 'grid', key: 'slope',
     name: 'Pendiente (DEM USGS, 25 m)', visible: true, opacity: 0.6,
-    color: (s) => s > 25 ? [220, 30, 30, 200] : s > 15 ? [255, 140, 0, 170] : [40, 200, 120, 90],
-    legend: [['#28c878', '≤15°'], ['#ff8c00', '15–25°'], ['#dc1e1e', '>25°']],
+    color: (s) => s > 25 ? [220, 30, 30, 200] : s > 15 ? [255, 140, 0, 170] : [0, 0, 0, 0],
+    legend: [['transparent', '≤15°, sin color'], ['#ff8c00', '15–25°'], ['#dc1e1e', '>25°']],
     provenance: 'derived',
     source: 'Derivada del MSL Gale Merged DEM 1m (USGS), media en celdas de 25 m',
   },

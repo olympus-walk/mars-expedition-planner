@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { routeFractions, indexAtFraction } from '../lib/routeProgress.js';
 import { formatNumber } from '../lib/format.js';
 
-const HEIGHT = 176;
-const MARGIN = { top: 36, right: 14, bottom: 30, left: 54 };
+const HEIGHT = 184;
+const MARGIN = { top: 42, right: 16, bottom: 32, left: 58 };
+const PIN_Y = MARGIN.top - 13;
 
 function useWidth() {
   const ref = useRef(null);
@@ -88,10 +89,17 @@ export default function Profile({ route, stops = [], progress }) {
         <polygon className="area" points={`${x(0)},${bottom} ${line} ${x(1)},${bottom}`} />
         <polyline className="line" points={line} />
 
+        {[0, 1].map(fraction => (
+          <g key={fraction}>
+            <rect className="pin-base" x={x(fraction) - 8} y={PIN_Y - 8} width="16" height="16" rx="3" />
+            <text className="pin-text" x={x(fraction)} y={PIN_Y + 4} textAnchor="middle">B</text>
+          </g>
+        ))}
         {stopMarks.map(mark => (
           <g key={mark.label}>
             <line className="stop-mark" x1={x(mark.fraction)} x2={x(mark.fraction)} y1={MARGIN.top} y2={bottom} />
-            <text className="stop-label" x={x(mark.fraction)} y={MARGIN.top - 5} textAnchor="middle">{mark.label}</text>
+            <circle className="pin-stop" cx={x(mark.fraction)} cy={PIN_Y} r="8.5" />
+            <text className="pin-text" x={x(mark.fraction)} y={PIN_Y + 4} textAnchor="middle">{mark.label}</text>
           </g>
         ))}
 

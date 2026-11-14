@@ -28,6 +28,29 @@ function ResizeWatcher() {
   return null;
 }
 
+function RouteFocus({ route }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!route) return;
+    map.invalidateSize();
+    map.fitBounds(L.latLngBounds(route.latlngs), { padding: [24, 24], maxZoom: map.getZoom() });
+  }, [map, route]);
+  return null;
+}
+
+function ResolutionNote({ base }) {
+  const map = useMap();
+  const [zoom, setZoom] = useState(map.getZoom());
+  useMapEvents({ zoomend: () => setZoom(map.getZoom()) });
+  const enlargement = 2 ** Math.round(zoom - base.maxNativeZoom);
+  if (enlargement < 4) return null;
+  return (
+    <p className="map-note">
+      {base.name} tiene {base.resolution}: aquí se ve ampliada {enlargement} veces.
+    </p>
+  );
+}
+
 function CursorReadout({ grid }) {
   const [point, setPoint] = useState(null);
   useMapEvents({ mousemove: (event) => setPoint(event.latlng), mouseout: () => setPoint(null) });
@@ -76,10 +99,11 @@ export default function MarsMap({ grid, baseId, layerState, waypoints, route, se
   };
 
   return (
-    <MapContainer crs={L.CRS.EPSG4326} bounds={AREA.bounds} boundsOptions={{ padding: [48, 48] }}
+    <MapContainer crs={L.CRS.EPSG4326} bounds={AREA.bounds} boundsOptions={{ padding: [24, 24] }}
       minZoom={2} maxZoom={14} zoomControl={false} className="map">
       <ZoomControl position="topright" zoomInTitle="Acercar" zoomOutTitle="Alejar" />
       <ResizeWatcher />
+      <RouteFocus route={route} />
       <TileLayer key={base.id} url={base.url} maxNativeZoom={base.maxNativeZoom} bounds={base.bounds} noWrap
         attribution={base.source}
         eventHandlers={{ loading: () => setIsLoading(true), load: () => setIsLoading(false) }} />
@@ -111,6 +135,7 @@ export default function MarsMap({ grid, baseId, layerState, waypoints, route, se
       ))}
 
       <CursorReadout grid={grid} />
+      <ResolutionNote base={base} />
       {isLoading && <div className="map-loading" role="status">Cargando imágenes…</div>}
     </MapContainer>
   );
