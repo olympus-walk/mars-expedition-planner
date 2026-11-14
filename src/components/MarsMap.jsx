@@ -12,7 +12,7 @@ const baseIcon = L.divIcon({ className: 'map-pin map-pin-base', html: pinHtml('B
 
 function stopIcon(waypoint, isSelected) {
   const className = `map-pin map-pin-stop${isSelected ? ' is-selected' : ''}`;
-  const label = `Parada ${waypoint.number}: ${waypoint.name}`;
+  const label = `Stop ${waypoint.number}: ${waypoint.name}`;
   return L.divIcon({ className, html: pinHtml(waypoint.number, label), iconSize: [28, 28] });
 }
 
@@ -46,7 +46,7 @@ function ResolutionNote({ base }) {
   if (enlargement < 4) return null;
   return (
     <p className="map-note">
-      {base.name} tiene {base.resolution}: aquí se ve ampliada {enlargement} veces.
+      {base.name} is {base.resolution}: shown here enlarged {enlargement}×.
     </p>
   );
 }
@@ -101,7 +101,7 @@ export default function MarsMap({ grid, baseId, layerState, waypoints, route, se
   return (
     <MapContainer crs={L.CRS.EPSG4326} bounds={AREA.bounds} boundsOptions={{ padding: [24, 24] }}
       minZoom={2} maxZoom={14} zoomControl={false} className="map">
-      <ZoomControl position="topright" zoomInTitle="Acercar" zoomOutTitle="Alejar" />
+      <ZoomControl position="topright" zoomInTitle="Zoom in" zoomOutTitle="Zoom out" />
       <ResizeWatcher />
       <RouteFocus route={route} />
       <TileLayer key={base.id} url={base.url} maxNativeZoom={base.maxNativeZoom} bounds={base.bounds} noWrap
@@ -136,7 +136,7 @@ export default function MarsMap({ grid, baseId, layerState, waypoints, route, se
 
       <CursorReadout grid={grid} />
       <ResolutionNote base={base} />
-      {isLoading && <div className="map-loading" role="status">Cargando imágenes…</div>}
+      {isLoading && <div className="map-loading" role="status">Loading imagery…</div>}
     </MapContainer>
   );
 }

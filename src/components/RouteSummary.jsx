@@ -20,33 +20,33 @@ export default function RouteSummary({ route, mode, limits, stops, onOpenHud }) 
   const highest = Math.max(...route.profile);
 
   return (
-    <section className="dock" aria-label="Resumen de la ruta">
+    <section className="dock" aria-label="Route summary">
       <div className="dock-head">
-        <h2>Ruta {limits[mode].label.toLowerCase()}</h2>
+        <h2>{limits[mode].label} route</h2>
         <div className="dock-status">
           {route.warnings.length
             ? route.warnings.map(warning => <p key={warning} className="status status-warn"><Icon name="alert" size={16} />{warning}</p>)
-            : <p className="status status-ok"><Icon name="check" size={16} />Dentro de los límites de EVA y dosis definidos</p>}
+            : <p className="status status-ok"><Icon name="check" size={16} />Within the assumed EVA and dose limits</p>}
         </div>
         <div className="dock-actions">
           <button className="button button-quiet" aria-expanded={showProfile} onClick={() => setShowProfile(v => !v)}>
-            {showProfile ? 'Ocultar perfil' : 'Ver perfil'}
+            {showProfile ? 'Hide profile' : 'Show profile'}
           </button>
-          <button className="button" onClick={onOpenHud}>Abrir HUD</button>
+          <button className="button" onClick={onOpenHud}>Open HUD</button>
         </div>
       </div>
 
       <div className="dock-body">
         <div className="dock-info">
           <dl className="stats">
-            <Stat label="Distancia" value={route.distKm.toFixed(2)} unit="km" />
-            <Stat label="Tiempo de EVA" value={route.hours.toFixed(1)} unit="h" note="Estimado" />
-            <Stat label="Dosis" value={route.dose.toFixed(1)} unit="µGy" note="Estimada" />
-            <Stat label="Pendiente máxima" value={`${maxSlope.toFixed(1)}°`} note={`Límite ${limits[mode].maxSlope}°`} />
-            <Stat wide label="Elevación" value={`${formatNumber(lowest)} a ${formatNumber(highest)}`} unit="m" note="DEM de USGS, malla de 25 m" />
+            <Stat label="Distance" value={route.distKm.toFixed(2)} unit="km" />
+            <Stat label="EVA time" value={route.hours.toFixed(1)} unit="h" note="Estimated" />
+            <Stat label="Dose" value={route.dose.toFixed(1)} unit="µGy" note="Estimated" />
+            <Stat label="Maximum slope" value={`${maxSlope.toFixed(1)}°`} note={`Assumed limit ${limits[mode].maxSlope}°`} />
+            <Stat wide label="Elevation" value={`${formatNumber(lowest)} to ${formatNumber(highest)}`} unit="m" note="USGS DEM, 25 m grid" />
           </dl>
           <p className="note">
-            Base y paradas aproximadas. Tiempo de EVA, dosis y límites: supuestos de diseño no validados. La ruta no garantiza que el terreno sea seguro.
+            Base and stops are approximate. EVA time, dose and limits are illustrative assumptions, not validated operational limits. The route does not certify that the terrain is safe.
           </p>
         </div>
         {showProfile && <Profile route={route} stops={stops} />}

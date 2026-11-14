@@ -23,7 +23,7 @@ export const LAYERS = [
   // ───────── MAPAS BASE ─────────
   {
     id: 'ctxGale', group: 'base', type: 'tile',
-    name: 'CTX de Gale', detail: 'Imagen óptica', resolution: '10 m/px',
+    name: 'Gale CTX', detail: 'Optical image', resolution: '10 m/px',
     url: `${T}/Gale_CTX_BlockAdj_dd/1.0.0//default/default028mm/{z}/{y}/{x}.png`,
     maxNativeZoom: 12,
     bounds: [[-6.5732988, 135.1842593], [-2.8077809, 139.2413012]],
@@ -32,7 +32,7 @@ export const LAYERS = [
   },
   {
     id: 'viking', group: 'base', type: 'tile',
-    name: 'Viking en color', detail: 'Imagen óptica', resolution: '232 m/px',
+    name: 'Viking color', detail: 'Optical image', resolution: '232 m/px',
     url: `${T}/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0//default/default028mm/{z}/{y}/{x}.jpg`,
     maxNativeZoom: 7,
     provenance: 'real',
@@ -40,70 +40,70 @@ export const LAYERS = [
   },
   {
     id: 'mola', group: 'base', type: 'tile',
-    name: 'MOLA', detail: 'Relieve coloreado', resolution: '463 m/px',
+    name: 'MOLA', detail: 'Colored relief', resolution: '463 m/px',
     url: `${T}/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/{z}/{y}/{x}.jpg`,
     maxNativeZoom: 6,
     provenance: 'real',
-    source: 'NASA/JPL Mars Trek · MOLA relieve coloreado',
+    source: 'NASA/JPL Mars Trek · MOLA colored relief',
   },
   {
     id: 'themisDay', group: 'base', type: 'tile',
-    name: 'THEMIS diurno', detail: 'Infrarrojo, no es temperatura', resolution: '100 m/px',
+    name: 'THEMIS daytime', detail: 'Infrared, not temperature', resolution: '100 m/px',
     url: `${T}/THEMIS_DayIR_ControlledMosaics_100m_v2_oct2018/1.0.0//default/default028mm/{z}/{y}/{x}.png`,
     maxNativeZoom: 9,
     bounds: [[-65.0006576, -179.9999997], [65.0007535, 179.9998849]],
     provenance: 'real',
-    source: 'NASA/JPL Mars Trek · Mars Odyssey THEMIS IR diurno (imagen, no es temperatura)',
+    source: 'NASA/JPL Mars Trek · Mars Odyssey THEMIS IR daytime (image, not temperature)',
   },
   {
     id: 'themisNight', group: 'base', type: 'tile',
-    name: 'THEMIS nocturno', detail: 'Infrarrojo, no es temperatura', resolution: '100 m/px',
+    name: 'THEMIS nighttime', detail: 'Infrared, not temperature', resolution: '100 m/px',
     url: `${T}/THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018/1.0.0//default/default028mm/{z}/{y}/{x}.png`,
     maxNativeZoom: 9,
     bounds: [[-65.0006576, -179.9999997], [65.0007535, 179.9998849]],
     provenance: 'real',
-    source: 'NASA/JPL Mars Trek · Mars Odyssey THEMIS IR nocturno (imagen, no es temperatura)',
+    source: 'NASA/JPL Mars Trek · Mars Odyssey THEMIS IR nighttime (image, not temperature)',
   },
 
   // ───────── TERRENO (calculadas en grid.js) ─────────
   {
     id: 'slope', group: 'terreno', type: 'grid', key: 'slope',
-    name: 'Pendiente (DEM USGS, 25 m)', visible: true, opacity: 0.6,
+    name: 'Slope (USGS DEM, 25 m)', visible: true, opacity: 0.6,
     color: (s) => s > 25 ? [220, 30, 30, 200] : s > 15 ? [255, 140, 0, 170] : [0, 0, 0, 0],
-    legend: [['transparent', '≤15°, sin color'], ['#ff8c00', '15–25°'], ['#dc1e1e', '>25°']],
+    legend: [['transparent', '≤15°, no color'], ['#ff8c00', '15–25°'], ['#dc1e1e', '>25°']],
     provenance: 'derived',
-    source: 'Derivada del MSL Gale Merged DEM 1m (USGS), media en celdas de 25 m',
+    source: 'Derived from the USGS MSL Gale Merged DEM 1m, averaged over 25 m cells',
   },
 
   // ───────── SEGURIDAD ─────────
   {
     id: 'obstacle', group: 'seguridad', type: 'grid', key: 'obstacle',
-    name: 'Sin datos del DEM', visible: true, opacity: 1,
+    name: 'No DEM data', visible: true, opacity: 1,
     color: (o) => o ? [0, 0, 0, 220] : [0, 0, 0, 0],
-    legend: [['#000', 'Sin elevación']],
+    legend: [['#000', 'No elevation']],
     provenance: 'derived',
-    source: 'Celdas sin elevación válida en el DEM de USGS. No es un mapa de rocas',
+    source: 'Cells without valid elevation in the USGS DEM. Not a rock map',
   },
 
   // ───────── MISIÓN ─────────
   {
     id: 'curiosity', group: 'mision', type: 'line',
-    name: 'Ruta de Curiosity (ejemplo)', visible: false, opacity: 1,
+    name: 'Curiosity route (example)', visible: false, opacity: 1,
     color: '#ffffff', dash: '6 6',
     positions: [  // ⚠️ coordenadas de ejemplo: reemplazar por las reales
       [-4.795, 137.335], [-4.780, 137.350], [-4.765, 137.368], [-4.750, 137.385],
     ],
     provenance: 'synthetic',
-    source: 'Ejemplo ilustrativo. No es la ruta real de Curiosity',
+    source: 'Illustrative example. Not the real Curiosity route',
   },
 ];
 
 export const GROUPS = {
-  base: 'Mapa base',
-  terreno: 'Terreno',
-  geologia: 'Geología',
-  seguridad: 'Seguridad',
-  mision: 'Misión',
+  base: 'Base map',
+  terreno: 'Terrain',
+  geologia: 'Geology',
+  seguridad: 'Safety',
+  mision: 'Mission',
 };
 
 // Estado inicial: { slope: {visible:true, opacity:0.6}, ... }

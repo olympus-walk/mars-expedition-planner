@@ -53,7 +53,7 @@ export function planRoute(g, base, waypoints, mode, limits) {
   const stops = [base, ...waypoints, base], legs = [];
   for (let k = 0; k < stops.length - 1; k++) {
     const leg = astar(g, stops[k], stops[k+1], limits[mode].maxSlope);
-    if (!leg) return { error: `Sin ruta segura entre ${stops[k].name} y ${stops[k+1].name}` };
+    if (!leg) return { error: `No route found between ${stops[k].name} and ${stops[k+1].name} within the ${limits[mode].maxSlope}° slope limit on the 25 m grid` };
     legs.push({ ...leg, from: stops[k].name, to: stops[k+1].name });
   }
   const distKm = legs.reduce((a, l) => a + l.distKm, 0);
@@ -65,8 +65,8 @@ export function planRoute(g, base, waypoints, mode, limits) {
     latlngs: legs.flatMap(l => l.latlngs),
     profile: legs.flatMap(l => l.profile),
     warnings: [
-      hours > limits.maxEvaHours && `Excede EVA máx (${limits.maxEvaHours} h)`,
-      dose > limits.maxEvaDoseMicroGy && `Dosis sobre límite (${limits.maxEvaDoseMicroGy} µGy)`,
+      hours > limits.maxEvaHours && `Exceeds assumed ${limits.maxEvaHours} h EVA limit`,
+      dose > limits.maxEvaDoseMicroGy && `Above assumed ${limits.maxEvaDoseMicroGy} µGy dose limit`,
     ].filter(Boolean),
   };
 }

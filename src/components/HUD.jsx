@@ -4,7 +4,7 @@ import Icon from './Icon.jsx';
 import { routeFractions, indexAtFraction } from '../lib/routeProgress.js';
 import { formatNumber } from '../lib/format.js';
 
-const cardinals = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+const cardinals = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 
 function bearingDegrees([lat0, lon0], [lat1, lon1]) {
   const east = (lon1 - lon0) * Math.cos(lat0 * Math.PI / 180);
@@ -46,8 +46,8 @@ export default function HUD({ route, stops, limits, onExit }) {
   if (!route?.latlngs) {
     return (
       <div className="hud hud-empty">
-        <p>Calcula una ruta antes de abrir el HUD.</p>
-        <button className="button" onClick={onExit}>Volver al mapa</button>
+        <p>Calculate a route before opening the HUD.</p>
+        <button className="button" onClick={onExit}>Back to map</button>
       </div>
     );
   }
@@ -63,18 +63,18 @@ export default function HUD({ route, stops, limits, onExit }) {
     <div className="hud">
       <header className="hud-head">
         <div>
-          <h1>HUD de exploración</h1>
-          <p>Simulación del recorrido sobre la ruta calculada, con base y paradas aproximadas. No son datos en vivo.</p>
+          <h1>Exploration HUD</h1>
+          <p>Simulated traverse along the calculated route, with approximate base and stops. Not live data.</p>
         </div>
-        <button className="button" onClick={onExit}>Salir del HUD</button>
+        <button className="button" onClick={onExit}>Exit HUD</button>
       </header>
 
       <dl className="hud-readouts">
-        <Readout label="Tiempo de EVA" value={hours.toFixed(2)} unit="h" note="Estimado" />
-        <Readout label="Dosis acumulada" value={dose.toFixed(1)} unit="µGy" note="Estimada" />
-        <Readout label="Oxígeno" value={(100 - t * 70).toFixed(0)} unit="%" note="Simulado, sin modelo real" />
-        <Readout label="Elevación" value={formatNumber(route.profile[index])} unit="m" note="DEM de USGS" />
-        <Readout label="Distancia restante" value={remainKm.toFixed(2)} unit="km" />
+        <Readout label="EVA time" value={hours.toFixed(2)} unit="h" note="Estimated" />
+        <Readout label="Accumulated dose" value={dose.toFixed(1)} unit="µGy" note="Estimated" />
+        <Readout label="Oxygen" value={(100 - t * 70).toFixed(0)} unit="%" note="Simulated, no real model" />
+        <Readout label="Elevation" value={formatNumber(route.profile[index])} unit="m" note="USGS DEM" />
+        <Readout label="Distance remaining" value={remainKm.toFixed(2)} unit="km" />
       </dl>
 
       <div className="hud-heading">
@@ -83,17 +83,17 @@ export default function HUD({ route, stops, limits, onExit }) {
           <span className="compass-arrow" style={{ transform: `rotate(${bearing}deg)` }}><Icon name="arrow" size={56} /></span>
         </div>
         <div>
-          <p className="hud-leg-label">Tramo actual</p>
-          <h2>{leg.from} a {leg.to}</h2>
-          <p>Rumbo a la siguiente parada: {bearing.toFixed(0)}° {cardinals[Math.round(bearing / 45) % 8]}</p>
-          <p>Pendiente máxima del tramo: {leg.maxSlope.toFixed(0)}° (malla de 25 m)</p>
+          <p className="hud-leg-label">Current leg</p>
+          <h2>{leg.from} to {leg.to}</h2>
+          <p>Heading to next stop: {bearing.toFixed(0)}° {cardinals[Math.round(bearing / 45) % 8]}</p>
+          <p>Maximum slope on this leg: {leg.maxSlope.toFixed(0)}° (25 m grid)</p>
         </div>
       </div>
 
       {mustReturn && (
         <p className="hud-alert" role="alert">
           <Icon name="alert" size={20} />
-          Punto de no retorno cercano: se superó el 70 % del límite de EVA o de dosis. Iniciar regreso. (Aviso simulado)
+          Point of no return approaching: over 70% of the assumed EVA or dose limit. Start the return. (Simulated alert)
         </p>
       )}
 
@@ -101,10 +101,10 @@ export default function HUD({ route, stops, limits, onExit }) {
 
       <div className="hud-controls">
         <button className="button button-icon" onClick={() => setIsPlaying(v => !v)}
-          aria-label={isPlaying ? 'Pausar simulación' : 'Reanudar simulación'}>
+          aria-label={isPlaying ? 'Pause simulation' : 'Resume simulation'}>
           <Icon name={isPlaying ? 'pause' : 'play'} />
         </button>
-        <input type="range" min="0" max="1" step="0.01" value={t} aria-label="Progreso del recorrido"
+        <input type="range" min="0" max="1" step="0.01" value={t} aria-label="Traverse progress"
           onChange={e => setT(+e.target.value)} />
         <output>{Math.round(t * 100)} %</output>
       </div>

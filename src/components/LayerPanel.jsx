@@ -1,7 +1,7 @@
 import React from 'react';
 import { LAYERS } from '../data/layers.js';
 
-const provenanceLabels = { real: 'Real', derived: 'Derivado', synthetic: 'Simulado' };
+const provenanceLabels = { real: 'Real', derived: 'Derived', synthetic: 'Simulated' };
 const baseLayers = LAYERS.filter(l => l.type === 'tile');
 const overlays = LAYERS.filter(l => l.type !== 'tile');
 
@@ -22,7 +22,7 @@ export default function LayerPanel({ baseId, setBaseId, state, setState, recomme
           <span className="option-title">{layer.name}</span>
           <span className="option-source">{layer.detail}, {layer.resolution}</span>
         </span>
-        {layer.id === recommendedId && <span className="option-hint">Recomendada</span>}
+        {layer.id === recommendedId && <span className="option-hint">Recommended</span>}
         {layer.provenance !== 'real' && <ProvenanceTag value={layer.provenance} />}
       </label>
     );
@@ -42,7 +42,7 @@ export default function LayerPanel({ baseId, setBaseId, state, setState, recomme
         </label>
         {visible && layer.type !== 'line' && (
           <label className="opacity">
-            <span>Opacidad</span>
+            <span>Opacity</span>
             <input type="range" min="0" max="1" step="0.05" value={opacity}
               onChange={e => update(layer.id, { opacity: +e.target.value })} />
             <output>{Math.round(opacity * 100)} %</output>
@@ -62,11 +62,11 @@ export default function LayerPanel({ baseId, setBaseId, state, setState, recomme
   return (
     <div className="layers">
       <fieldset className="layer-group">
-        <legend>Mapa base <ProvenanceTag value="real" /></legend>
+        <legend>Base map <ProvenanceTag value="real" /></legend>
         {baseLayers.map(renderBase)}
       </fieldset>
       <fieldset className="layer-group">
-        <legend>Sobre el mapa</legend>
+        <legend>Overlays</legend>
         {overlays.map(renderOverlay)}
       </fieldset>
     </div>

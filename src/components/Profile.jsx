@@ -62,14 +62,14 @@ export default function Profile({ route, stops = [], progress }) {
   };
 
   const markerIndex = hoverIndex ?? (progress == null ? null : indexAtFraction(fractions, progress));
-  const summary = `Perfil de elevación de la ruta: de ${formatNumber(lowest)} a ${formatNumber(highest)} metros a lo largo de ${route.distKm.toFixed(2)} kilómetros`;
+  const summary = `Elevation profile of the route: from ${formatNumber(lowest)} to ${formatNumber(highest)} meters over ${route.distKm.toFixed(2)} kilometers`;
 
   return (
     <div ref={ref} className="profile">
       <svg width={width} height={HEIGHT} role="img" aria-label={summary}
         onPointerMove={handleMove} onPointerLeave={() => setHoverIndex(null)}>
         {(markerIndex == null || width >= 460) &&
-          <text className="axis-title" x={MARGIN.left} y={12}>Elevación (m, DEM de USGS)</text>}
+          <text className="axis-title" x={MARGIN.left} y={12}>Elevation (m, USGS DEM)</text>}
 
         {ticksBetween(yMin, yMax, yStep).map(value => (
           <g key={value}>
@@ -84,7 +84,7 @@ export default function Profile({ route, stops = [], progress }) {
             <text className="tick" x={x(km / route.distKm)} y={bottom + 16} textAnchor="middle">{km}</text>
           </g>
         ))}
-        <text className="axis-title" x={MARGIN.left + innerWidth} y={HEIGHT - 2} textAnchor="end">Distancia (km)</text>
+        <text className="axis-title" x={MARGIN.left + innerWidth} y={HEIGHT - 2} textAnchor="end">Distance (km)</text>
 
         <polygon className="area" points={`${x(0)},${bottom} ${line} ${x(1)},${bottom}`} />
         <polyline className="line" points={line} />

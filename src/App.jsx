@@ -65,7 +65,7 @@ export default function App() {
     <div className={`app${panelOpen ? ' panel-open' : ''}${hud ? ' is-covered' : ''}`}>
       <header className="topbar">
         <button ref={menuButton} className="button button-icon" onClick={() => setPanelOpen(true)}
-          aria-label="Abrir panel de planificación" aria-expanded={panelOpen}>
+          aria-label="Open planning panel" aria-expanded={panelOpen}>
           <Icon name="menu" />
         </button>
         <strong>Olympus Walk</strong>
@@ -73,13 +73,13 @@ export default function App() {
       </header>
       <div className="backdrop" onClick={closePanel} />
 
-      <aside className="panel" aria-label="Planificación de la expedición">
+      <aside className="panel" aria-label="Expedition planning">
         <header className="brand">
           <div>
             <h1>Olympus Walk</h1>
-            <p>Planificador de expediciones en Marte</p>
+            <p>Mars expedition planner</p>
           </div>
-          <button ref={closeButton} className="button button-icon panel-close" onClick={closePanel} aria-label="Cerrar panel">
+          <button ref={closeButton} className="button button-icon panel-close" onClick={closePanel} aria-label="Close panel">
             <Icon name="close" />
           </button>
         </header>
@@ -87,7 +87,7 @@ export default function App() {
         <p className="site">{AREA.name}</p>
 
         <section>
-          <h2>Modo de exploración</h2>
+          <h2>Exploration mode</h2>
           <div className="segmented">
             {['walk', 'rover'].map(key => (
               <button key={key} aria-pressed={mode === key} onClick={() => changeMode(key)}>
@@ -96,19 +96,19 @@ export default function App() {
             ))}
           </div>
           <p className="note">
-            Hasta {LIMITS[mode].maxSlope}° de pendiente, a {LIMITS[mode].speedKmh} km/h (supuestos de diseño).
+            Assumed limits: slopes up to {LIMITS[mode].maxSlope}° at {LIMITS[mode].speedKmh} km/h (illustrative, not validated).
           </p>
         </section>
 
         <section>
-          <h2>Paradas científicas</h2>
+          <h2>Science stops</h2>
           <ul className="stops">
             {stops.map(w => {
               const isSelected = selected === w.id;
               return (
                 <li key={w.id} className={`stop${isSelected ? ' is-selected' : ''}`}>
                   <input type="checkbox" checked={active.includes(w.id)} onChange={() => toggle(w.id)}
-                    aria-label={`Incluir ${w.name} en la ruta`} />
+                    aria-label={`Include ${w.name} in the route`} />
                   <button className="stop-name" aria-expanded={isSelected} onClick={() => setSelected(isSelected ? null : w.id)}>
                     <span className="stop-number">{w.number}</span>{w.name}<Icon name="chevron" size={16} />
                   </button>
@@ -125,29 +125,29 @@ export default function App() {
           </ul>
           <p className="caution">
             <Icon name="alert" size={18} />
-            <span>Base y paradas aproximadas, sin validar. La ruta solo respeta la pendiente máxima en celdas de 25 m: no garantiza que el terreno sea seguro.</span>
+            <span>Base and stops are approximate and unvalidated. The route only respects the maximum slope on 25 m cells: it does not certify that the terrain is safe.</span>
           </p>
-          <button className="button button-primary" onClick={calc} disabled={!wps.length}>Calcular ruta</button>
+          <button className="button button-primary" onClick={calc} disabled={!wps.length}>Calculate route</button>
         </section>
 
         <section>
-          <h2>Capas</h2>
+          <h2>Layers</h2>
           <LayerPanel baseId={baseId} setBaseId={setBaseId} state={layerState} setState={setLayerState}
             recommendedId={recommendedBaseId} />
         </section>
 
         <section>
-          <h2>Datos de la misión</h2>
+          <h2>Mission data</h2>
           <dl className="facts">
             <div>
-              <dt>Terreno</dt>
-              <dd>{grid.synthetic ? 'De ejemplo (sintético)' : `${grid.meta.product}, malla de ${grid.meta.cellSizeNorthSouthM} m`}</dd>
+              <dt>Terrain</dt>
+              <dd>{grid.synthetic ? 'Example (synthetic)' : `USGS MSL Gale DEM (1 m), ${grid.meta.cellSizeNorthSouthM} m grid`}</dd>
             </div>
-            <div><dt>Imágenes</dt><dd>NASA/JPL Mars Trek (CTX, THEMIS, MOLA, Viking)</dd></div>
-            <div><dt>Límite de EVA</dt><dd>{LIMITS.maxEvaHours} h</dd></div>
-            <div><dt>Límite de dosis</dt><dd>{LIMITS.maxEvaDoseMicroGy} µGy</dd></div>
+            <div><dt>Imagery</dt><dd>NASA/JPL Mars Trek (CTX, THEMIS, MOLA, Viking)</dd></div>
+            <div><dt>EVA limit (assumed)</dt><dd>{LIMITS.maxEvaHours} h</dd></div>
+            <div><dt>Dose limit (assumed)</dt><dd>{LIMITS.maxEvaDoseMicroGy} µGy</dd></div>
           </dl>
-          <p className="note">Los límites y las velocidades son supuestos de diseño, sin validar.</p>
+          <p className="note">EVA and dose limits and speeds are illustrative assumptions, not validated operational limits.</p>
         </section>
       </aside>
 
@@ -155,7 +155,7 @@ export default function App() {
         <MarsMap grid={grid} layerState={layerState} baseId={baseId} waypoints={wps}
           route={route?.legs ? route : null} selected={selected} onSelect={setSelected} />
         {route?.error && (
-          <p className="dock status status-warn" role="alert"><Icon name="alert" size={16} />{route.error}. Prueba otro modo o quita una parada.</p>
+          <p className="dock status status-warn" role="alert"><Icon name="alert" size={16} />{route.error}. Try another mode or remove a stop.</p>
         )}
         {route?.legs && (
           <RouteSummary route={route} mode={mode} limits={LIMITS} stops={stopNumbers} onOpenHud={() => setHud(true)} />
