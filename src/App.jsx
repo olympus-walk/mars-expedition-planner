@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import MarsMap from './components/MarsMap.jsx';
 import RouteSummary from './components/RouteSummary.jsx';
 import HUD from './components/HUD.jsx';
@@ -29,6 +29,25 @@ export default function App() {
   const [route, setRoute] = useState(null);
   const [hud, setHud] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
+  const menuButton = useRef(null);
+  const closeButton = useRef(null);
+
+  const closePanel = () => {
+    if (panelOpen) menuButton.current?.focus();
+    setPanelOpen(false);
+  };
+
+  useEffect(() => {
+    if (!panelOpen) return undefined;
+    closeButton.current?.focus();
+    const closeOnEscape = (event) => {
+      if (event.key !== 'Escape') return;
+      menuButton.current?.focus();
+      setPanelOpen(false);
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [panelOpen]);
 
   const stops = WAYPOINTS.map((w, i) => ({ ...w, number: i + 1 }));
   const wps = stops.filter(w => active.includes(w.id));
@@ -36,7 +55,7 @@ export default function App() {
 
   const calc = () => {
     setRoute(planRoute(grid, BASE, wps, mode, LIMITS));
-    setPanelOpen(false);
+    closePanel();
   };
   const toggle = (id) => { setActive(a => a.includes(id) ? a.filter(x => x !== id) : [...a, id]); setRoute(null); };
   const changeMode = (key) => { setMode(key); setRoute(null); };
@@ -46,13 +65,14 @@ export default function App() {
   return (
     <div className={`app${panelOpen ? ' panel-open' : ''}`}>
       <header className="topbar">
-        <button className="button button-icon" onClick={() => setPanelOpen(true)} aria-label="Abrir panel de planificación">
+        <button ref={menuButton} className="button button-icon" onClick={() => setPanelOpen(true)}
+          aria-label="Abrir panel de planificación" aria-expanded={panelOpen}>
           <Icon name="menu" />
         </button>
         <strong>Olympus Walk</strong>
         <span>{AREA.name}</span>
       </header>
-      <div className="backdrop" onClick={() => setPanelOpen(false)} />
+      <div className="backdrop" onClick={closePanel} />
 
       <aside className="panel" aria-label="Planificación de la expedición">
         <header className="brand">
@@ -60,7 +80,7 @@ export default function App() {
             <h1>Olympus Walk</h1>
             <p>AREO-WALK, planificador de expediciones en Marte</p>
           </div>
-          <button className="button button-icon panel-close" onClick={() => setPanelOpen(false)} aria-label="Cerrar panel">
+          <button ref={closeButton} className="button button-icon panel-close" onClick={closePanel} aria-label="Cerrar panel">
             <Icon name="close" />
           </button>
         </header>

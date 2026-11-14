@@ -47,7 +47,7 @@ export default function RouteSummary({ route, mode, limits, stops, onOpenHud }) 
           : <p className="status status-ok"><Icon name="check" size={16} />Dentro de los límites de EVA y dosis definidos</p>}
       </div>
       <p className="note">
-        Tiempo de EVA, dosis y límites: supuestos de diseño no validados. La ruta no garantiza que el terreno sea seguro.
+        Base y paradas aproximadas. Tiempo de EVA, dosis y límites: supuestos de diseño no validados. La ruta no garantiza que el terreno sea seguro.
       </p>
       </div>
 

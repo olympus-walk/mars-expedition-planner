@@ -64,7 +64,7 @@ export default function HUD({ route, stops, limits, onExit }) {
       <header className="hud-head">
         <div>
           <h1>HUD de exploración</h1>
-          <p>Simulación del recorrido sobre la ruta calculada. No son datos en vivo.</p>
+          <p>Simulación del recorrido sobre la ruta calculada, con base y paradas aproximadas. No son datos en vivo.</p>
         </div>
         <button className="button" onClick={onExit}>Salir del HUD</button>
       </header>

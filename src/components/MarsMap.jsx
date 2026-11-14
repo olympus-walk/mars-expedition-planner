@@ -6,12 +6,17 @@ import { LAYERS } from '../data/layers.js';
 import { layerToImage, latLonToCell } from '../lib/grid.js';
 import { formatLatLon, formatNumber } from '../lib/format.js';
 
-const baseIcon = L.divIcon({ className: 'map-pin map-pin-base', html: 'B', iconSize: [28, 28] });
+const pinHtml = (symbol, label) => `<span aria-hidden="true">${symbol}</span><span class="sr-only">${label}</span>`;
 
-function stopIcon(number, isSelected) {
+const baseIcon = L.divIcon({ className: 'map-pin map-pin-base', html: pinHtml('B', 'Base'), iconSize: [28, 28] });
+
+function stopIcon(waypoint, isSelected) {
   const className = `map-pin map-pin-stop${isSelected ? ' is-selected' : ''}`;
-  return L.divIcon({ className, html: String(number), iconSize: [28, 28] });
+  const label = `Parada ${waypoint.number}: ${waypoint.name}`;
+  return L.divIcon({ className, html: pinHtml(waypoint.number, label), iconSize: [28, 28] });
 }
+
+const isActivationKey = (event) => ['Enter', ' '].includes(event.originalEvent.key);
 
 function ResizeWatcher() {
   const map = useMap();
@@ -88,12 +93,19 @@ export default function MarsMap({ grid, baseId, layerState, waypoints, route, se
         <Polyline positions={route.latlngs} interactive={false} pathOptions={{ color: '#6ccadb', weight: 4 }} />
       </>}
 
-      <Marker position={[BASE.lat, BASE.lon]} icon={baseIcon}>
+      <Marker position={[BASE.lat, BASE.lon]} icon={baseIcon} keyboard={false}>
         <Tooltip direction="top" offset={[0, -14]}>{BASE.name}</Tooltip>
       </Marker>
       {waypoints.map(w => (
-        <Marker key={w.id} position={[w.lat, w.lon]} icon={stopIcon(w.number, selected === w.id)}
-          eventHandlers={{ click: () => onSelect(w.id) }}>
+        <Marker key={w.id} position={[w.lat, w.lon]} icon={stopIcon(w, selected === w.id)}
+          eventHandlers={{
+            click: () => onSelect(w.id),
+            keypress: (event) => {
+              if (!isActivationKey(event)) return;
+              event.originalEvent.preventDefault();
+              onSelect(w.id);
+            },
+          }}>
           <Tooltip direction="top" offset={[0, -14]}>{w.number}. {w.name}</Tooltip>
         </Marker>
       ))}
