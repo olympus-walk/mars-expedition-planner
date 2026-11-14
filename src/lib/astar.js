@@ -2,10 +2,22 @@
 import { latLonToCell, cellToLatLon, cellSizeKm } from './grid.js';
 
 export function cellCost(g, i, maxSlope) {
-  if (g.obstacle[i]) return Infinity;
+
+  if (g.obstacle && g.obstacle[i]) return Infinity;
+
+
   const s = g.slope[i];
-  if (s > maxSlope) return Infinity;
-  return 1 + (s / maxSlope) * 2 + (1 - g.thermal[i]) * 1.5;
+  if (!Number.isFinite(s) || s > maxSlope) return Infinity;
+
+  let cost = 1 + (s / maxSlope) * 2;
+
+
+  const t = g.thermal ? g.thermal[i] : undefined;
+  if (typeof t === 'number' && Number.isFinite(t) && t >= 0 && t <= 1) {
+    cost += (1 - t) * 1.5;
+  }
+
+  return cost;
 }
 
 export function astar(g, from, to, maxSlope) {
