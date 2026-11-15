@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
 import { buildRouteFacts } from '../lib/routeFacts.js';
-import { templateAnswer, numbersAreGrounded, mentionsSafety, quickQuestions } from '../lib/explain.js';
+import { templateAnswer, generalAnswer, numbersAreGrounded, mentionsSafety, quickQuestions } from '../lib/explain.js';
 
 const apiUrl = import.meta.env.VITE_ASSISTANT_API_URL;
 const sourceLabels = {
   route: 'From the calculated route, without AI',
+  builtin: 'Built-in reply, without AI',
   ai: 'AI-generated, check it against the route summary',
 };
 
@@ -65,8 +66,9 @@ export default function Assistant({ grid, route, mode, limits }) {
     setText('');
     setMessages(list => [...list, { from: 'user', text: question }]);
 
-    if (!facts) {
-      setMessages(list => [...list, { from: 'bot', text: 'Calculate a route first, then ask about it.', source: 'route' }]);
+    const general = generalAnswer(question);
+    if (general || !facts) {
+      setMessages(list => [...list, { from: 'bot', text: general || 'Calculate a route first, then ask about it.', source: 'builtin' }]);
       return;
     }
 
