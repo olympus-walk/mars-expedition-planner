@@ -10,6 +10,7 @@ import { AREA, BASE, WAYPOINTS, LIMITS } from './data/mission.js';
 import { initialLayerState } from './data/layers.js';
 import demData from './data/grid.json';
 import LayerPanel from './components/LayerPanel.jsx';
+import PlanetaryProtection from './components/PlanetaryProtection.jsx';
 
 const recommendedBaseId = 'ctxGale';
 const modeIcons = { walk: 'walk', rover: 'rover' };
@@ -149,6 +150,8 @@ export default function App() {
           </dl>
           <p className="note">EVA and dose limits and speeds are illustrative assumptions, not validated operational limits.</p>
         </section>
+
+        <PlanetaryProtection />
       </aside>
 
       <main>

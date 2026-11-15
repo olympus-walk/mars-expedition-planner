@@ -24,6 +24,7 @@ La etiqueta está en el campo `provenance` de cada capa en `src/data/layers.js` 
 | Capa "Pendiente (DEM USGS, 25 m)" | `layers.js` (`slope`) | derived | Pendiente calculada de la malla real. |
 | Capa "Sin datos del DEM" | `layers.js` (`obstacle`) | derived | Celdas sin elevación válida (hoy ninguna). No es un mapa de rocas. |
 | Malla sintética | `grid.js` (`generateGrid`) | synthetic | Ruido sinusoidal. Ya no la usa la app; se conserva para pruebas. |
+| Panel "Planetary protection" | `src/data/planetaryProtection.js` | texto con fuente | Resumen de COSPAR, NASA y National Academies. No clasifica regiones ni evalúa la ruta. Ver sección 6. |
 | Base y waypoints | `mission.js` | synthetic | Posiciones aproximadas, sin validar contra la ruta real. |
 | Ruta de Curiosity | `layers.js` (`curiosity`) | synthetic | Cuatro puntos de ejemplo. |
 | Límites de EVA (velocidades, pendientes máximas, 6 h, 60 µGy) | `mission.js` (`LIMITS`) | supuestos de diseño | Sin fuente. Solo la tasa de dosis cita a Hassler et al. (2014) en el código y no se ha verificado aquí. |
@@ -181,7 +182,23 @@ node scripts/check_grid.mjs
 - Las distancias usan la esfera de radio 3396.19 km del propio DEM, no un elipsoide.
 - La base y los waypoints siguen siendo posiciones sintéticas. Que caigan en celdas transitables no valida su interés científico.
 
-## 6. Pendiente (no integrado)
+## 6. Protección planetaria (panel "Planetary protection")
+
+Contenido en `src/data/planetaryProtection.js`; `PlanetaryProtection.jsx` solo lo muestra. Se verificó el 14-11-2026 contra el texto de estas fuentes:
+
+- **COSPAR Policy on Planetary Protection, versión 2026** ([página](https://cosparhq.cnes.fr/cospar-policy-on-planetary-protection/), [PDF](https://cosparhq.cnes.fr/assets/uploads/2026/01/SRT_224_Editorial_PPP-Nov-2025.pdf)). Se define como estándar internacional voluntario y no vinculante. Define "Special Region", da los límites de actividad del agua (0.5) y temperatura (−28 °C) y establece la Categoría IVc. No usa el término "Uncertain Region".
+- **NASA Planetary Protection** ([página](https://sma.nasa.gov/sma-disciplines/planetary-protection/)). Cita el Artículo IX del Tratado del Espacio Exterior, la NPR 8715.24 (septiembre de 2021, sustituye a la NPR 8020.12D), la lista de la NID 8715.129 para misiones tripuladas a Marte y las definiciones de contaminación directa e inversa.
+- **National Academies, Review of the MEPAG Report on Mars Special Regions, 2015** ([capítulo](https://www.nationalacademies.org/read/21816/chapter/8)). De aquí sale el concepto "Uncertain Regions" y la lista de tipos de rasgo. Es una revisión científica de 2015, no una norma. Su umbral de temperatura (−25 °C) es anterior al de COSPAR 2026 (−28 °C), por eso el panel solo usa el de COSPAR.
+
+Qué muestra el panel y qué no:
+
+- Distingue tratado, recomendación COSPAR, política NASA y revisión científica.
+- Las listas de regiones (`entries`) están vacías. No hay coordenadas ni polígonos. Para añadir una región validada: un objeto `{ name, evidence, sourceLabel, sourceUrl }` en `specialRegions.entries` o `uncertainRegions.entries`.
+- El estado de la ruta aparece como "Not evaluated". La app no comprueba si la base, las paradas o la ruta tocan una región, y no debe decirlo.
+
+Sin verificar: el estado vigente de la NID 8715.129 (las NID caducan o se renuevan) y el texto del Tratado en la fuente original de la ONU; se citó a través de NASA y COSPAR.
+
+## 7. Pendiente (no integrado)
 
 - **THEMIS cuantitativo:** los mosaicos de inercia térmica de unos 100 m/px, entre ±60° de latitud, en teselas de 30°×60° ([ejemplo en USGS](https://astrogeology.usgs.gov/search/map/themis_thermal_inertia_mosaic_quantitative_30s060e_100mpp)), tienen versión cuantitativa y cualitativa. Precisión absoluta indicada: unos 20 %. Es el único producto de la lista que podría dar un valor numérico para `thermal`. Hace falta localizar la tesela que cubre 137.4° E, -4.75° N y leer solo nuestra ventana, como se hizo con el DEM. Todavía no se ha comprobado.
 - **HiRISE:** recortes de imagen o DTM propios de la caja. Sin comprobar.
