@@ -72,6 +72,11 @@ main { display: flex; flex-direction: column; min-width: 0; min-height: 0; overf
 .caution .icon { margin-top: 1px; color: var(--warn); }
 .facts div { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
 .facts dt { color: var(--muted); }
+.facts dd { font-variant-numeric: tabular-nums; }
+.facts + .note { margin-top: 12px; }
+.conditions-site { margin-bottom: 4px; color: var(--cyan); font-size: 14px; font-weight: 500; }
+.unavailable { color: var(--muted); font-style: italic; }
+.panel a { color: var(--cyan); text-underline-offset: 2px; }
 
 /* Botones */
 .button {

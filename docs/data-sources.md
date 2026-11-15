@@ -26,6 +26,7 @@ La etiqueta está en el campo `provenance` de cada capa en `src/data/layers.js` 
 | Malla sintética | `grid.js` (`generateGrid`) | synthetic | Ruido sinusoidal. Ya no la usa la app; se conserva para pruebas. |
 | Base y waypoints | `mission.js` | synthetic | Posiciones aproximadas, sin validar contra la ruta real. |
 | Ruta de Curiosity | `layers.js` (`curiosity`) | synthetic | Cuatro puntos de ejemplo. |
+| Condiciones de Marte (panel "Mars conditions") | `src/data/marsConditions.json` | real (histórico) | Una observación diaria de REMS en Gale. Viento y polvo sin datos. Ver sección 6. |
 | Límites de EVA (velocidades, pendientes máximas, 6 h, 60 µGy) | `mission.js` (`LIMITS`) | supuestos de diseño | Sin fuente. Solo la tasa de dosis cita a Hassler et al. (2014) en el código y no se ha verificado aquí. |
 
 La imagen `public/layers/minerales.webp` ya no está en la configuración. No es un mapa CRISM: es la ilustración de un globo marciano de 474×258 px. El archivo sigue en el repositorio.
@@ -181,7 +182,19 @@ node scripts/check_grid.mjs
 - Las distancias usan la esfera de radio 3396.19 km del propio DEM, no un elipsoide.
 - La base y los waypoints siguen siendo posiciones sintéticas. Que caigan en celdas transitables no valida su interés científico.
 
-## 6. Pendiente (no integrado)
+## 6. Condiciones ambientales: REMS de Curiosity
+
+- **Fuente:** feed público `https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json`. Lo elabora el Centro de Astrobiología (CSIC-INTA) con los datos de REMS y lo publica NASA. Su aviso dice que es para divulgación y que los datos científicos están en el PDS ([REMS en el PDS Atmospheres Node](https://pds-atmospheres.nmsu.edu/data_and_services/atmospheres_data/MARS/curiosity/rems.html)). También advierte que el rover influye en las lecturas y que REMS no mide a la misma hora cada sol.
+- **Unidades:** el feed no las declara. Se verificaron con el script oficial del widget de NASA que lee este mismo feed (`https://mars.nasa.gov/js/general/weather/msl-weather.min.js`): trata `min_temp` y `max_temp` como °C (convierte con `9·t/5+32` a °F) y la página archivada ([Wayback, 02-12-2020](http://web.archive.org/web/20201202173215/https://mars.nasa.gov/msl/weather/)) rotula la presión como "Pressure (Pa)". La descripción de presión del propio feed habla de pascales.
+- **Campos usados:** `sol`, `terrestrial_date`, `ls`, `min_temp`/`max_temp` (aire, °C), `min_gts_temp`/`max_gts_temp` (suelo, sensor GTS, °C) y `pressure` (Pa).
+- **Observación integrada:** sol 4995 (25-08-2026, Ls 341°): aire −71 a −5 °C, suelo −84 a 4 °C, 777 Pa. Es el último sol del feed al descargarlo el 14-11-2026; Curiosity ya va por soles posteriores, así que la app la muestra como histórica, nunca como actual.
+- **Viento:** `wind_speed` y `wind_direction` valen `--` en los 4745 soles del feed. Se muestra "Data unavailable".
+- **Polvo:** `atmo_opacity` solo contiene la etiqueta "Sunny" (4742 soles) o `--`. No es una medida de opacidad, así que no se usa y se muestra "Data unavailable".
+- **Alternativa revisada, MEDA de Perseverance (cráter Jezero, no Gale):** el feed equivalente (`category=mars2020`) solo trae 7 soles (1127 a 1133, abril de 2024) con temperatura y presión, sin viento ni polvo. No completa ningún campo que falte en REMS y mezclaría otro lugar, así que no se integró. Los datos de viento de MEDA están en el PDS, con su sensor de viento degradado desde 2022.
+- **Reproducir:** `node scripts/fetch_mars_conditions.mjs` descarga el feed, toma el sol más reciente con temperatura del aire y presión, comprueba que mínimo ≤ máximo y escribe `src/data/marsConditions.json` con la fecha de descarga, el SHA-256 de la respuesta y el número de soles. Como el feed cambia, otra descarga puede dar otro sol.
+- **Lo que la app no hace:** no califica las condiciones como favorables o peligrosas ni las usa en la ruta, el A* o los límites de EVA.
+
+## 7. Pendiente (no integrado)
 
 - **THEMIS cuantitativo:** los mosaicos de inercia térmica de unos 100 m/px, entre ±60° de latitud, en teselas de 30°×60° ([ejemplo en USGS](https://astrogeology.usgs.gov/search/map/themis_thermal_inertia_mosaic_quantitative_30s060e_100mpp)), tienen versión cuantitativa y cualitativa. Precisión absoluta indicada: unos 20 %. Es el único producto de la lista que podría dar un valor numérico para `thermal`. Hace falta localizar la tesela que cubre 137.4° E, -4.75° N y leer solo nuestra ventana, como se hizo con el DEM. Todavía no se ha comprobado.
 - **HiRISE:** recortes de imagen o DTM propios de la caja. Sin comprobar.

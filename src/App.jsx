@@ -10,6 +10,7 @@ import { AREA, BASE, WAYPOINTS, LIMITS } from './data/mission.js';
 import { initialLayerState } from './data/layers.js';
 import demData from './data/grid.json';
 import LayerPanel from './components/LayerPanel.jsx';
+import MarsConditions from './components/MarsConditions.jsx';
 
 const recommendedBaseId = 'ctxGale';
 const modeIcons = { walk: 'walk', rover: 'rover' };
@@ -135,6 +136,8 @@ export default function App() {
           <LayerPanel baseId={baseId} setBaseId={setBaseId} state={layerState} setState={setLayerState}
             recommendedId={recommendedBaseId} />
         </section>
+
+        <MarsConditions />
 
         <section>
           <h2>Mission data</h2>
