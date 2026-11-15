@@ -3,6 +3,7 @@ import { cellSizeKm } from './grid.js';
 const round1 = (x) => Math.round(x * 10) / 10;
 const round2 = (x) => Math.round(x * 100) / 100;
 
+// Cells crossed by the straight line between two cells (Bresenham)
 function lineCells(cols, from, to) {
   let row = (from / cols) | 0, col = from % cols;
   const endRow = (to / cols) | 0, endCol = to % cols;
@@ -19,17 +20,33 @@ function lineCells(cols, from, to) {
   }
 }
 
+// Checks the straight line of one leg: too-steep cells, cells without data and max slope
 function checkStraightLine(g, leg, maxSlope) {
   const from = leg.cells[0], to = leg.cells[leg.cells.length - 1];
   let tooSteep = 0, noData = 0, maxSlopeOnLine = 0;
   for (const i of lineCells(g.cols, from, to)) {
     const slope = g.slope[i];
-    if (g.obstacle[i] || !Number.isFinite(slope)) { noData++; continue; }
+    if ((g.obstacle && g.obstacle[i]) || !Number.isFinite(slope)) { noData++; continue; }
     if (slope > maxSlope) tooSteep++;
     maxSlopeOnLine = Math.max(maxSlopeOnLine, slope);
   }
   const rows = ((from / g.cols) | 0) - ((to / g.cols) | 0), cols = (from % g.cols) - (to % g.cols);
   return { km: Math.hypot(rows, cols) * cellSizeKm(g), tooSteep, noData, maxSlopeOnLine };
+}
+
+// The "why" of the route, computed by code (the AI only rephrases it)
+function reasonsOf(f) {
+  const reasons = [];
+  if (f.straightTooSteepCells) {
+    reasons.push(`The straight lines between stops cross ${f.straightTooSteepCells} cells steeper than the ${f.slopeLimitDeg}° limit (up to ${f.straightMaxSlopeDeg}°)`);
+  }
+  if (f.straightNoDataCells) {
+    reasons.push(`They also cross ${f.straightNoDataCells} cells without valid elevation data`);
+  }
+  reasons.push(f.straightTooSteepCells || f.straightNoDataCells
+    ? `So A* detours and the route is ${f.routeKm} km, ${f.extraPct}% longer than the ${f.straightKm} km straight lines`
+    : `No straight-line cell is above the limit; the route is ${f.extraPct}% longer because A* favors gentler slopes`);
+  return reasons;
 }
 
 export function buildRouteFacts(g, route, mode, limits) {
@@ -40,7 +57,7 @@ export function buildRouteFacts(g, route, mode, limits) {
   const steepestLeg = route.legs.reduce((a, b) => (b.maxSlope > a.maxSlope ? b : a));
   const movingHours = route.distKm / limit.speedKmh;
 
-  return {
+  const facts = {
     mode: limit.label,
     terrain: g.synthetic ? 'example (synthetic) terrain' : 'USGS MSL Gale DEM',
     cellSizeM: Math.round(g.meta?.cellSizeNorthSouthM ?? cellSizeKm(g) * 1000),
@@ -48,7 +65,7 @@ export function buildRouteFacts(g, route, mode, limits) {
     speedKmh: limit.speedKmh,
     routeKm: round2(route.distKm),
     straightKm: round2(straightKm),
-    extraPct: Math.round(Math.max(0, route.distKm / straightKm - 1) * 100),
+    extraPct: straightKm > 0 ? Math.round(Math.max(0, route.distKm / straightKm - 1) * 100) : 0,
     straightTooSteepCells: lines.reduce((sum, line) => sum + line.tooSteep, 0),
     straightNoDataCells: lines.reduce((sum, line) => sum + line.noData, 0),
     straightMaxSlopeDeg: round1(Math.max(...lines.map(line => line.maxSlopeOnLine))),
@@ -66,6 +83,16 @@ export function buildRouteFacts(g, route, mode, limits) {
     doseRateMicroGyPerHour: limits.doseMicroGyPerHour,
     doseLimitMicroGy: limits.maxEvaDoseMicroGy,
     overDoseLimit: route.dose > limits.maxEvaDoseMicroGy,
+    syntheticTerrain: !!g.synthetic,
     warnings: route.warnings,
   };
+
+  facts.limitations = [
+    'Base and stop positions are approximate',
+    `Slopes come from ${facts.terrain} on ${facts.cellSizeM} m cells; smaller features are not represented`,
+    'EVA time, dose, speed and limits are illustrative assumptions, not validated operational limits',
+    'Dose is EVA time multiplied by an assumed rate, not a measurement',
+  ];
+  facts.reasons = reasonsOf(facts);
+  return facts;
 }
