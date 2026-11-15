@@ -398,3 +398,69 @@ p.dock { margin: 0; align-items: center; font-size: 13.5px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ═══════ WELCOME ═══════ */
+.welcome{--w-accent:#ff7a3d;--w-cyan:#00e5ff;--w-mut:#9c8b7e;--w-txt:#f3ebe4;
+  position:relative;height:100vh;height:100dvh;overflow:hidden;color:var(--w-txt);
+  display:grid;grid-template-columns:1fr 1.1fr;align-items:center;padding:0 6vw;
+  font-family:system-ui,'Segoe UI',sans-serif;
+  background:radial-gradient(ellipse at 75% 50%,#2a1208 0%,#0d0806 50%,#030202 100%)}
+.welcome .stars{position:absolute;inset:0;pointer-events:none;opacity:.7;
+  background-image:radial-gradient(1px 1px at 8% 15%,#fff,transparent),radial-gradient(1px 1px at 25% 80%,#fff,transparent),
+  radial-gradient(1.5px 1.5px at 40% 30%,#fff,transparent),radial-gradient(1px 1px at 60% 90%,#fff,transparent),
+  radial-gradient(1px 1px at 85% 10%,#fff,transparent),radial-gradient(1.5px 1.5px at 95% 70%,#fff,transparent),
+  radial-gradient(1px 1px at 15% 50%,#fff,transparent),radial-gradient(1px 1px at 50% 8%,#fff,transparent)}
+
+.welcome .w-left{position:relative;z-index:2}
+.welcome .badge{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+  border:1px solid var(--w-accent);color:var(--w-accent);padding:5px 12px;border-radius:20px}
+.welcome h1{font-size:clamp(48px,8vw,124px);line-height:.95;margin:18px 0 10px;letter-spacing:.02em;
+  background:linear-gradient(180deg,#fff 0%,#ffcfb0 60%,#ff7a3d 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.welcome h1 span{-webkit-text-fill-color:var(--w-accent);color:var(--w-accent)}
+.welcome .subtitle{font-size:clamp(16px,1.8vw,22px);color:var(--w-mut);margin:0 0 32px}
+.welcome .start{padding:16px 34px;font-size:17px;font-weight:700;background:var(--w-accent);color:#000;
+  border:none;border-radius:999px;cursor:pointer;box-shadow:0 0 30px rgba(255,122,61,.55);transition:transform .2s,box-shadow .2s}
+.welcome .start:hover{transform:scale(1.06);box-shadow:0 0 45px rgba(255,122,61,.8)}
+.welcome .start:focus-visible{outline:3px solid var(--w-cyan);outline-offset:3px}
+
+.welcome .w-right{position:relative;display:grid;place-items:center;height:100%}
+.welcome .mars{position:relative;width:min(560px,44vw);aspect-ratio:1;border-radius:50%;overflow:hidden;
+  background:#b4502a;box-shadow:0 0 90px rgba(255,100,40,.35)}
+.welcome .mars-surface{position:absolute;top:0;left:0;width:200%;height:100%;background-color:#b4502a;
+  background-image:
+    radial-gradient(ellipse 9% 6% at 20% 35%,#7a2e14 60%,transparent 62%),
+    radial-gradient(ellipse 14% 8% at 70% 60%,#8c3518 55%,transparent 60%),
+    radial-gradient(circle 3% at 40% 70%,#5e220e 70%,transparent 75%),
+    radial-gradient(circle 2% at 85% 25%,#5e220e 70%,transparent 75%),
+    radial-gradient(ellipse 20% 5% at 50% 48%,#9a3f1d 50%,transparent 60%),
+    radial-gradient(ellipse 30% 12% at 30% 85%,#c96a3c 40%,transparent 60%),
+    linear-gradient(180deg,#f2e6dc 0%,#d9b7a2 4%,transparent 9%,transparent 91%,#d9b7a2 96%,#f2e6dc 100%);
+  background-size:50% 100%;background-repeat:repeat-x;animation:w-spin 50s linear infinite}
+@keyframes w-spin{to{transform:translateX(-50%)}}
+.welcome .mars-shade{position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 32% 30%,rgba(255,200,150,.25) 0%,transparent 40%,rgba(0,0,0,.55) 75%,rgba(0,0,0,.85) 100%);
+  box-shadow:inset -40px -20px 80px rgba(0,0,0,.6)}
+.welcome .orbit{position:absolute;width:min(680px,54vw);aspect-ratio:1;border-radius:50%;
+  border:1px dashed rgba(255,122,61,.25);animation:w-orbit 20s linear infinite}
+.welcome .orbit i{position:absolute;top:-5px;left:50%;width:10px;height:10px;border-radius:50%;
+  background:var(--w-cyan);box-shadow:0 0 12px var(--w-cyan)}
+@keyframes w-orbit{to{transform:rotate(360deg)}}
+
+.welcome .chip{position:absolute;z-index:2;background:rgba(18,12,9,.75);backdrop-filter:blur(6px);
+  border:1px solid rgba(255,122,61,.35);border-radius:12px;padding:10px 14px;animation:w-float 5s ease-in-out infinite}
+.welcome .chip b{display:block;font-size:20px;color:var(--w-cyan)}
+.welcome .chip span{font-size:12px;color:var(--w-mut)}
+.welcome .c1{top:12%;left:2%}
+.welcome .c2{top:18%;right:0;animation-delay:1s}
+.welcome .c3{bottom:16%;left:0;animation-delay:2s}
+.welcome .c4{bottom:10%;right:6%;animation-delay:3s}
+@keyframes w-float{50%{transform:translateY(-10px)}}
+
+@media (prefers-reduced-motion:reduce){.welcome *{animation:none !important}}
+@media(max-width:800px){
+  .welcome{grid-template-columns:1fr;grid-template-rows:auto 1fr;padding:6vh 6vw 0;text-align:center}
+  .welcome .mars{width:min(78vw,46vh)}
+  .welcome .orbit{width:min(92vw,56vh)}
+  .welcome .chip{padding:6px 10px}.welcome .chip b{font-size:15px}
+  .welcome .c1{top:4%;left:0}.welcome .c2{top:4%;right:0}.welcome .c3{bottom:8%;left:0}.welcome .c4{bottom:8%;right:0}
+}
