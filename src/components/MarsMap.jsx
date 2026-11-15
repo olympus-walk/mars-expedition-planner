@@ -1,14 +1,82 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import L from 'leaflet';
-import { MapContainer, TileLayer, ImageOverlay, Polyline, CircleMarker, Tooltip, Rectangle } from 'react-leaflet';
+import { MapContainer, TileLayer, ImageOverlay, Polyline, Marker, Tooltip, Rectangle, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
 import { AREA, BASE } from '../data/mission.js';
 import { LAYERS } from '../data/layers.js';
-import { layerToImage } from '../lib/grid.js';
+import { layerToImage, latLonToCell } from '../lib/grid.js';
+import { formatLatLon, formatNumber } from '../lib/format.js';
+
+const pinHtml = (symbol, label) => `<span aria-hidden="true">${symbol}</span><span class="sr-only">${label}</span>`;
+
+const baseIcon = L.divIcon({ className: 'map-pin map-pin-base', html: pinHtml('B', 'Base'), iconSize: [28, 28] });
+
+function stopIcon(waypoint, isSelected) {
+  const className = `map-pin map-pin-stop${isSelected ? ' is-selected' : ''}`;
+  const label = `Stop ${waypoint.number}: ${waypoint.name}`;
+  return L.divIcon({ className, html: pinHtml(waypoint.number, label), iconSize: [28, 28] });
+}
+
+const isActivationKey = (event) => ['Enter', ' '].includes(event.originalEvent.key);
+
+function ResizeWatcher() {
+  const map = useMap();
+  useEffect(() => {
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
+  return null;
+}
+
+function RouteFocus({ route }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!route) return;
+    map.invalidateSize();
+    map.fitBounds(L.latLngBounds(route.latlngs), { padding: [24, 24], maxZoom: map.getZoom() });
+  }, [map, route]);
+  return null;
+}
+
+function ResolutionNote({ base }) {
+  const map = useMap();
+  const [zoom, setZoom] = useState(map.getZoom());
+  useMapEvents({ zoomend: () => setZoom(map.getZoom()) });
+  const enlargement = 2 ** Math.round(zoom - base.maxNativeZoom);
+  if (enlargement < 4) return null;
+  return (
+    <p className="map-note">
+      {base.name} is {base.resolution}: shown here enlarged {enlargement}×.
+    </p>
+  );
+}
+
+function CursorReadout({ grid }) {
+  const [point, setPoint] = useState(null);
+  useMapEvents({ mousemove: (event) => setPoint(event.latlng), mouseout: () => setPoint(null) });
+  if (!point) return null;
+
+  const [[south, west], [north, east]] = grid.bounds;
+  const isInside = point.lat > south && point.lat < north && point.lng > west && point.lng < east;
+  let elevation = NaN;
+  if (isInside) {
+    const [row, col] = latLonToCell(grid, point.lat, point.lng);
+    elevation = grid.elev[row * grid.cols + col];
+  }
+
+  return (
+    <div className="map-readout">
+      <span>{formatLatLon(point.lat, point.lng)}</span>
+      {Number.isFinite(elevation) && <span>{formatNumber(elevation)} m (DEM)</span>}
+    </div>
+  );
+}
 
 export default function MarsMap({ grid, baseId, layerState, waypoints, route, selected, onSelect }) {
-  // Convierte las capas tipo "grid" en imágenes (solo una vez)
+  const [isLoading, setIsLoading] = useState(false);
+
   const gridImgs = useMemo(() => Object.fromEntries(
-    LAYERS.filter(l => l.type === 'grid').map(l => [l.id, layerToImage(grid, l.key, l.color)])
+    LAYERS.filter(l => l.type === 'grid' && grid[l.key]).map(l => [l.id, layerToImage(grid, l.key, l.color)])
   ), [grid]);
 
   const base = LAYERS.find(l => l.id === baseId);
@@ -18,6 +86,7 @@ export default function MarsMap({ grid, baseId, layerState, waypoints, route, se
     if (!st?.visible) return null;
     switch (l.type) {
       case 'grid':
+        if (!gridImgs[l.id]) return null;
         return <ImageOverlay key={l.id} url={gridImgs[l.id]} bounds={grid.bounds} opacity={st.opacity} className="pixel" />;
       case 'image':
         return <ImageOverlay key={l.id} url={l.url} bounds={l.bounds} opacity={st.opacity} />;
@@ -30,24 +99,44 @@ export default function MarsMap({ grid, baseId, layerState, waypoints, route, se
   };
 
   return (
-    <MapContainer crs={L.CRS.EPSG4326} center={AREA.center} zoom={11} minZoom={2} maxZoom={14} className="map">
-      <TileLayer key={base.id} url={base.url} maxNativeZoom={base.maxNativeZoom} noWrap attribution={base.source} />
+    <MapContainer crs={L.CRS.EPSG4326} bounds={AREA.bounds} boundsOptions={{ padding: [24, 24] }}
+      minZoom={2} maxZoom={14} zoomControl={false} className="map">
+      <ZoomControl position="topright" zoomInTitle="Zoom in" zoomOutTitle="Zoom out" />
+      <ResizeWatcher />
+      <RouteFocus route={route} />
+      <TileLayer key={base.id} url={base.url} maxNativeZoom={base.maxNativeZoom} bounds={base.bounds} noWrap
+        attribution={base.source}
+        eventHandlers={{ loading: () => setIsLoading(true), load: () => setIsLoading(false) }} />
 
       {LAYERS.filter(l => l.type !== 'tile').map(renderLayer)}
 
-      <Rectangle bounds={grid.bounds} pathOptions={{ color: '#ff7a3d', weight: 1, fill: false, dashArray: '4' }} />
-      {route?.latlngs && <Polyline positions={route.latlngs} pathOptions={{ color: '#00e5ff', weight: 4 }} />}
+      <Rectangle bounds={grid.bounds} interactive={false}
+        pathOptions={{ color: '#e8743b', weight: 1, fill: false, dashArray: '5 4' }} />
+      {route?.latlngs && <>
+        <Polyline positions={route.latlngs} interactive={false} pathOptions={{ color: '#0b1017', weight: 8, opacity: 0.8 }} />
+        <Polyline positions={route.latlngs} interactive={false} pathOptions={{ color: '#6ccadb', weight: 4 }} />
+      </>}
 
-      <CircleMarker center={[BASE.lat, BASE.lon]} radius={9} pathOptions={{ color: '#fff', fillColor: '#ff7a3d', fillOpacity: 1 }}>
-        <Tooltip permanent direction="top">Base</Tooltip>
-      </CircleMarker>
-      {waypoints.map((w, i) => (
-        <CircleMarker key={w.id} center={[w.lat, w.lon]} radius={selected === w.id ? 10 : 7}
-          eventHandlers={{ click: () => onSelect(w.id) }}
-          pathOptions={{ color: '#fff', fillColor: '#ffd23d', fillOpacity: 1 }}>
-          <Tooltip permanent direction="right">{i + 1}. {w.name}</Tooltip>
-        </CircleMarker>
+      <Marker position={[BASE.lat, BASE.lon]} icon={baseIcon} keyboard={false}>
+        <Tooltip direction="top" offset={[0, -14]}>{BASE.name}</Tooltip>
+      </Marker>
+      {waypoints.map(w => (
+        <Marker key={w.id} position={[w.lat, w.lon]} icon={stopIcon(w, selected === w.id)}
+          eventHandlers={{
+            click: () => onSelect(w.id),
+            keypress: (event) => {
+              if (!isActivationKey(event)) return;
+              event.originalEvent.preventDefault();
+              onSelect(w.id);
+            },
+          }}>
+          <Tooltip direction="top" offset={[0, -14]}>{w.number}. {w.name}</Tooltip>
+        </Marker>
       ))}
+
+      <CursorReadout grid={grid} />
+      <ResolutionNote base={base} />
+      {isLoading && <div className="map-loading" role="status">Loading imagery…</div>}
     </MapContainer>
   );
 }

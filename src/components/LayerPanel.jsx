@@ -1,47 +1,74 @@
 import React from 'react';
-import { LAYERS, GROUPS } from '../data/layers.js';
+import { LAYERS } from '../data/layers.js';
 
-export default function LayerPanel({ baseId, setBaseId, state, setState }) {
-  const update = (id, patch) => setState(s => {
-    const copia = { ...s };
-    copia[id] = { ...s[id], ...patch };
-    return copia;
-  });
+const provenanceLabels = { real: 'Real', derived: 'Derived', synthetic: 'Simulated' };
+const baseLayers = LAYERS.filter(l => l.type === 'tile');
+const overlays = LAYERS.filter(l => l.type !== 'tile');
+
+function ProvenanceTag({ value }) {
+  if (!provenanceLabels[value]) return null;
+  return <span className={`tag tag-${value}`}>{provenanceLabels[value]}</span>;
+}
+
+export default function LayerPanel({ baseId, setBaseId, state, setState, recommendedId }) {
+  const update = (id, patch) => setState(s => ({ ...s, [id]: { ...s[id], ...patch } }));
+
+  const renderBase = (layer) => {
+    const checked = baseId === layer.id;
+    return (
+      <label key={layer.id} className={`option${checked ? ' is-on' : ''}`}>
+        <input type="radio" name="base" checked={checked} onChange={() => setBaseId(layer.id)} />
+        <span className="option-body">
+          <span className="option-title">{layer.name}</span>
+          <span className="option-source">{layer.detail}, {layer.resolution}</span>
+        </span>
+        {layer.id === recommendedId && <span className="option-hint">Recommended</span>}
+        {layer.provenance !== 'real' && <ProvenanceTag value={layer.provenance} />}
+      </label>
+    );
+  };
+
+  const renderOverlay = (layer) => {
+    const { visible, opacity } = state[layer.id];
+    return (
+      <div key={layer.id} className={`option-block${visible ? ' is-on' : ''}`}>
+        <label className="option">
+          <input type="checkbox" checked={visible} onChange={e => update(layer.id, { visible: e.target.checked })} />
+          <span className="option-body">
+            <span className="option-title">{layer.name}</span>
+            {visible && <span className="option-source">{layer.source}</span>}
+          </span>
+          <ProvenanceTag value={layer.provenance} />
+        </label>
+        {visible && layer.type !== 'line' && (
+          <label className="opacity">
+            <span>Opacity</span>
+            <input type="range" min="0" max="1" step="0.05" value={opacity}
+              onChange={e => update(layer.id, { opacity: +e.target.value })} />
+            <output>{Math.round(opacity * 100)} %</output>
+          </label>
+        )}
+        {visible && layer.legend && (
+          <ul className="legend">
+            {layer.legend.map(([color, text]) => (
+              <li key={text}><i style={{ background: color }} />{text}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  };
 
   return (
-    <div className="layer-panel">
-      {Object.entries(GROUPS).map(([gid, gname]) => {
-        const items = LAYERS.filter(l => l.group === gid);
-        if (!items.length) return null;
-        return (
-          <div key={gid} className="layer-group">
-            <h4>{gname}</h4>
-            {items.map(l => l.type === 'tile' ? (
-              // Mapas base: radio (solo uno a la vez)
-              <label key={l.id}>
-                <input type="radio" name="base" checked={baseId === l.id} onChange={() => setBaseId(l.id)} /> {l.name}
-              </label>
-            ) : (
-              // Capas superpuestas: checkbox + opacidad
-              <div key={l.id} className="layer">
-                <label title={l.source}>
-                  <input type="checkbox" checked={state[l.id].visible}
-                    onChange={e => update(l.id, { visible: e.target.checked })} /> {l.name}
-                </label>
-                {state[l.id].visible && l.type !== 'line' && (
-                  <input type="range" min="0" max="1" step="0.05" value={state[l.id].opacity}
-                    onChange={e => update(l.id, { opacity: +e.target.value })} />
-                )}
-                {state[l.id].visible && l.legend && (
-                  <div className="legend">
-                    {l.legend.map(([c, t]) => <span key={t}><i style={{ background: c }} />{t}</span>)}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        );
-      })}
+    <div className="layers">
+      <fieldset className="layer-group">
+        <legend>Base map <ProvenanceTag value="real" /></legend>
+        {baseLayers.map(renderBase)}
+      </fieldset>
+      <fieldset className="layer-group">
+        <legend>Overlays</legend>
+        {overlays.map(renderOverlay)}
+      </fieldset>
     </div>
   );
 }
