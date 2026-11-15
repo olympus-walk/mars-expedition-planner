@@ -25,7 +25,7 @@ const examples = [
 const generalAnswers = {
   greeting: 'Hi! I explain the route you calculate: why it looks the way it does, its elevation, slope, EVA time, dose and limitations.',
   thanks: "You're welcome! Ask me anything else about the calculated route.",
-  help: `I explain the calculated route using only its A* result and the mission assumptions. I don't use AI, and I can't certify that a route is safe. You can ask: ${examples.join(' ')}`,
+  help: `I explain the calculated route using only its A* result and the mission assumptions.Answers use only the route data; an AI may rephrase them, and I can't certify that a route is safe. You can ask: ${examples.join(' ')}`,
   unknown: `I can't answer that. I only explain the calculated route, using its A* result and the mission assumptions. You can ask: ${examples.join(' ')}`,
 };
 
@@ -80,11 +80,14 @@ function answerFor(topic, f) {
 }
 
 export function generalAnswer(question) {
-  return generalAnswers[topicOf(question)] || null;
+  const topic = topicOf(question);
+  if (topic === 'unknown') return null;          // las preguntas libres van a la IA
+  return generalAnswers[topic] || null;
 }
 
 export function templateAnswer(question, facts) {
-  return generalAnswer(question) || answerFor(topicOf(question), facts);
+  const topic = topicOf(question);
+  return generalAnswers[topic] || answerFor(topic, facts);   // si la IA falla, "unknown" sigue con su mensaje
 }
 
 const numbersIn = (text) => text.match(/-?\d+(?:\.\d+)?/g) || [];
@@ -99,4 +102,9 @@ export function numbersAreGrounded(text, facts) {
 
 export function mentionsSafety(text) {
   return /\b(safe|safely|safety|certif\w*|guarantee\w*)\b/i.test(text);
+}
+
+
+export function saysNoData(text) {
+  return /don'?t have (that|this|the) data|no (tengo|data)|not (available|provided) in the data/i.test(text);
 }

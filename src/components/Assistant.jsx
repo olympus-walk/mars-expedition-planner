@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
 import { buildRouteFacts } from '../lib/routeFacts.js';
-import { templateAnswer, generalAnswer, numbersAreGrounded, mentionsSafety, quickQuestions } from '../lib/explain.js';
+import { templateAnswer, generalAnswer, numbersAreGrounded, mentionsSafety, saysNoData, quickQuestions } from '../lib/explain.js';
 
-const apiUrl = import.meta.env.VITE_ASSISTANT_API_URL;
+const apiUrl = import.meta.env.VITE_ASSISTANT_API_URL || 'https://olympus-walk-api.vercel.app/api/explicar';
 const sourceLabels = {
   route: 'From the calculated route, without AI',
   builtin: 'Built-in reply, without AI',
@@ -76,7 +76,7 @@ export default function Assistant({ grid, route, mode, limits }) {
     if (apiUrl) {
       setBusy(true);
       const aiAnswer = await askAi(question, facts).catch(() => null);
-      if (aiAnswer && numbersAreGrounded(aiAnswer, facts) && !mentionsSafety(aiAnswer)) {
+      if (aiAnswer && numbersAreGrounded(aiAnswer, facts) && !mentionsSafety(aiAnswer) && !saysNoData(aiAnswer)) {
         answer = aiAnswer;
         source = 'ai';
       }
