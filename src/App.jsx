@@ -12,6 +12,7 @@ import demData from './data/grid.json';
 import LayerPanel from './components/LayerPanel.jsx';
 import MarsConditions from './components/MarsConditions.jsx';
 import PlanetaryProtection from './components/PlanetaryProtection.jsx';
+import About from './components/About.jsx';
 import Assistant from './components/Assistant.jsx';
 
 const recommendedBaseId = 'ctxGale';
@@ -156,6 +157,8 @@ export default function App() {
         </section>
 
         <PlanetaryProtection />
+
+        <About />
       </aside>
 
       <main>
