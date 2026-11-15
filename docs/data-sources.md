@@ -29,6 +29,7 @@ La etiqueta está en el campo `provenance` de cada capa en `src/data/layers.js` 
 | Ruta de Curiosity | `layers.js` (`curiosity`) | synthetic | Cuatro puntos de ejemplo. |
 | Condiciones de Marte (panel "Mars conditions") | `src/data/marsConditions.json` | real (histórico) | Una observación diaria de REMS en Gale. Viento y polvo sin datos. Ver sección 6. |
 | Límites de EVA (velocidades, pendientes máximas, 6 h, 60 µGy) | `mission.js` (`LIMITS`) | supuestos de diseño | Sin fuente. Solo la tasa de dosis cita a Hassler et al. (2014) en el código y no se ha verificado aquí. |
+| Asistente de ruta ("Route assistant") | `src/lib/routeFacts.js`, `src/lib/explain.js` | derived | Respuestas por plantilla, sin IA, construidas solo con el resultado de A*, la malla y `LIMITS`. Nunca certifica que la ruta sea segura. La conexión a Gemini está desactivada: solo se activa con `VITE_ASSISTANT_API_URL`, y no debe configurarse hasta revisar el backend. |
 
 La imagen `public/layers/minerales.webp` ya no está en la configuración. No es un mapa CRISM: es la ilustración de un globo marciano de 474×258 px. El archivo sigue en el repositorio.
 

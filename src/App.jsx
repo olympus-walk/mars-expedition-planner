@@ -12,6 +12,7 @@ import demData from './data/grid.json';
 import LayerPanel from './components/LayerPanel.jsx';
 import MarsConditions from './components/MarsConditions.jsx';
 import PlanetaryProtection from './components/PlanetaryProtection.jsx';
+import Assistant from './components/Assistant.jsx';
 
 const recommendedBaseId = 'ctxGale';
 const modeIcons = { walk: 'walk', rover: 'rover' };
@@ -158,8 +159,11 @@ export default function App() {
       </aside>
 
       <main>
-        <MarsMap grid={grid} layerState={layerState} baseId={baseId} waypoints={wps}
-          route={route?.legs ? route : null} selected={selected} onSelect={setSelected} />
+        <div className="map-area">
+          <MarsMap grid={grid} layerState={layerState} baseId={baseId} waypoints={wps}
+            route={route?.legs ? route : null} selected={selected} onSelect={setSelected} />
+          {!hud && <Assistant grid={grid} route={route?.legs ? route : null} mode={mode} limits={LIMITS} />}
+        </div>
         {route?.error && (
           <p className="dock status status-warn" role="alert"><Icon name="alert" size={16} />{route.error}. Try another mode or remove a stop.</p>
         )}

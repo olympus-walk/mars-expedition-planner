@@ -11,6 +11,7 @@ const paths = {
   pause: <path d="M8.5 5.5v13M15.5 5.5v13" />,
   chevron: <path d="M6 9.5l6 6 6-6" />,
   arrow: <path d="M12 3l6 16-6-4-6 4 6-16z" />,
+  chat: <path d="M5 5.5h14a1 1 0 0 1 1 1V15a1 1 0 0 1-1 1h-8l-4.5 3.5V16H5a1 1 0 0 1-1-1V6.5a1 1 0 0 1 1-1z" />,
 };
 
 export default function Icon({ name, size = 18 }) {
