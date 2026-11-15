@@ -14,6 +14,7 @@ import MarsConditions from './components/MarsConditions.jsx';
 import PlanetaryProtection from './components/PlanetaryProtection.jsx';
 import About from './components/About.jsx';
 import Assistant from './components/Assistant.jsx';
+import Welcome from './components/Welcome.jsx';
 
 const recommendedBaseId = 'ctxGale';
 const modeIcons = { walk: 'walk', rover: 'rover' };
@@ -35,6 +36,7 @@ export default function App() {
   const [panelOpen, setPanelOpen] = useState(false);
   const menuButton = useRef(null);
   const closeButton = useRef(null);
+  const [inicio, setInicio] = useState(true);
 
   const closePanel = () => {
     if (panelOpen) menuButton.current?.focus();
@@ -64,6 +66,7 @@ export default function App() {
   const toggle = (id) => { setActive(a => a.includes(id) ? a.filter(x => x !== id) : [...a, id]); setRoute(null); };
   const changeMode = (key) => { setMode(key); setRoute(null); };
 
+  if (inicio) return <Welcome onStart={() => setInicio(false)} />;
   return (
     <>
     <div className={`app${panelOpen ? ' panel-open' : ''}${hud ? ' is-covered' : ''}`}>
