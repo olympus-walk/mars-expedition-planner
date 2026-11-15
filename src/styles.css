@@ -78,6 +78,23 @@ main { display: flex; flex-direction: column; min-width: 0; min-height: 0; overf
 .unavailable { color: var(--muted); font-style: italic; }
 .panel a { color: var(--cyan); text-underline-offset: 2px; }
 
+/* Protección planetaria */
+.pp-block { margin-top: 12px; border-top: 1px solid var(--line); }
+.pp-block summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; font-size: 14px; font-weight: 600; cursor: pointer; list-style: none; }
+.pp-block summary::-webkit-details-marker { display: none; }
+.pp-block summary .icon { flex: none; transition: transform 0.14s; }
+.pp-block[open] summary .icon { transform: rotate(180deg); }
+.pp-body { padding-bottom: 14px; font-size: 13.5px; }
+.pp-body > * + * { margin-top: 8px; }
+.pp-list { padding-left: 18px; list-style: disc; }
+.pp-list li + li { margin-top: 6px; }
+.pp-plain { padding-left: 0; list-style: none; }
+.pp-plain li + li { margin-top: 12px; }
+.tag { display: table; margin-bottom: 4px; padding: 1px 8px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--sand); font-size: 12px; }
+.pp-terms dt { font-weight: 600; }
+.pp-terms dd { color: var(--muted); }
+.pp-terms div + div { margin-top: 10px; }
+
 /* Botones */
 .button {
   display: inline-flex;
