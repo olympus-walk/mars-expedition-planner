@@ -6,7 +6,28 @@ const topics = [
   { id: 'slope', words: ['slope', 'slopes', 'steep', 'steepest', 'hard', 'hardest', 'difficult', 'leg', 'pendiente', 'difícil'] },
   { id: 'time', words: ['eva', 'time', 'hour', 'hours', 'duration', 'how long', 'tiempo', 'hora', 'horas'] },
   { id: 'dose', words: ['dose', 'radiation', 'µgy', 'dosis', 'radiación'] },
+  { id: 'summary', words: ['summary', 'overview', 'summarize', 'summarise', 'resumen'] },
+  { id: 'greeting', words: ['hi', 'hello', 'hey', 'hola'] },
+  { id: 'thanks', words: ['thanks', 'thank', 'thx', 'gracias'] },
+  { id: 'help', words: ['help', 'what can you do', 'who are you', 'ayuda'] },
 ];
+
+const examples = [
+  'Why this route?',
+  'Is this route safe?',
+  'What is the elevation?',
+  'What is the maximum slope?',
+  'How long will the EVA take?',
+  'What radiation dose will I get?',
+  'What are the route limitations?',
+];
+
+const generalAnswers = {
+  greeting: 'Hi! I explain the route you calculate: why it looks the way it does, its elevation, slope, EVA time, dose and limitations.',
+  thanks: "You're welcome! Ask me anything else about the calculated route.",
+  help: `I explain the calculated route using only its A* result and the mission assumptions. I don't use AI, and I can't certify that a route is safe. You can ask: ${examples.join(' ')}`,
+  unknown: `I can't answer that. I only explain the calculated route, using its A* result and the mission assumptions. You can ask: ${examples.join(' ')}`,
+};
 
 export const quickQuestions = [
   'Why this route?',
@@ -19,7 +40,7 @@ const assumptionNote = 'EVA time, dose, speed and limits are illustrative design
 
 function topicOf(question) {
   const text = ` ${(question.toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).join(' ')} `;
-  return topics.find(topic => topic.words.some(word => text.includes(` ${word} `)))?.id || 'summary';
+  return topics.find(topic => topic.words.some(word => text.includes(` ${word} `)))?.id || 'unknown';
 }
 
 function warningsOf(f) {
@@ -58,8 +79,12 @@ function answerFor(topic, f) {
   }
 }
 
+export function generalAnswer(question) {
+  return generalAnswers[topicOf(question)] || null;
+}
+
 export function templateAnswer(question, facts) {
-  return answerFor(topicOf(question), facts);
+  return generalAnswer(question) || answerFor(topicOf(question), facts);
 }
 
 const numbersIn = (text) => text.match(/-?\d+(?:\.\d+)?/g) || [];
