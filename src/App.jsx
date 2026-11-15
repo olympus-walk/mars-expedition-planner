@@ -15,6 +15,7 @@ import PlanetaryProtection from './components/PlanetaryProtection.jsx';
 import About from './components/About.jsx';
 import Assistant from './components/Assistant.jsx';
 import Welcome from './components/Welcome.jsx';
+import GameLink from './components/GameLink.jsx';
 
 const recommendedBaseId = 'ctxGale';
 const modeIcons = { walk: 'walk', rover: 'rover' };
@@ -169,6 +170,7 @@ export default function App() {
           <MarsMap grid={grid} layerState={layerState} baseId={baseId} waypoints={wps}
             route={route?.legs ? route : null} selected={selected} onSelect={setSelected} />
           {!hud && <Assistant grid={grid} route={route?.legs ? route : null} mode={mode} limits={LIMITS} />}
+          <GameLink />
         </div>
         {route?.error && (
           <p className="dock status status-warn" role="alert"><Icon name="alert" size={16} />{route.error}. Try another mode or remove a stop.</p>
