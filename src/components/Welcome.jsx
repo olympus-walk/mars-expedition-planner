@@ -15,7 +15,7 @@ export default function Welcome({ onStart }) {
         <span className="badge">NASA Space Apps Challenge</span>
         <div className="welcome-logo-main">
           <img
-            src="../../public/logo/logo-completo.png"
+            src="/logo/logo-completo.png"
             alt="Olympus Walk"
           />
         </div>
