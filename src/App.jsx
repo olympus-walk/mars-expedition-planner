@@ -169,8 +169,11 @@ export default function App() {
         <div className="map-area">
           <MarsMap grid={grid} layerState={layerState} baseId={baseId} waypoints={wps}
             route={route?.legs ? route : null} selected={selected} onSelect={setSelected} />
-          {!hud && <Assistant grid={grid} route={route?.legs ? route : null} mode={mode} limits={LIMITS} />}
-          <GameLink />
+          {!hud && (
+            <Assistant grid={grid} route={route?.legs ? route : null} mode={mode} limits={LIMITS}>
+              <GameLink />
+            </Assistant>
+          )}
         </div>
         {route?.error && (
           <p className="dock status status-warn" role="alert"><Icon name="alert" size={16} />{route.error}. Try another mode or remove a stop.</p>

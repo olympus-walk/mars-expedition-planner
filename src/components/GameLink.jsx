@@ -8,14 +8,13 @@ export default function GameLink() {
       href={GAME_URL}
       target="_blank"
       rel="noopener noreferrer"
-      className="button button-icon game-link"
-      aria-label="Play astronaut game"
-      title="Play astronaut game"
+      className="quick-button quick-game"
+      title="Play Game"
     >
       <svg
         className="icon"
-        width="18"
-        height="18"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -29,6 +28,8 @@ export default function GameLink() {
         <circle cx="16" cy="11.5" r=".7" fill="currentColor" />
         <circle cx="18" cy="13.5" r=".7" fill="currentColor" />
       </svg>
+      <span className="quick-label">Play Game</span>
+      <span className="sr-only">(opens in a new tab)</span>
     </a>
   );
 }
