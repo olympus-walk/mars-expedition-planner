@@ -13,7 +13,12 @@ export default function Welcome({ onStart }) {
 
       <div className="w-left">
         <span className="badge">NASA Space Apps Challenge</span>
-        <h1>OLYMPUS<span>·</span>WALK</h1>
+        <div className="welcome-logo-main">
+          <img
+            src="../../public/logo/logo-completo.png"
+            alt="Olympus Walk"
+          />
+        </div>
         <p className="subtitle">Plan safer Marswalks with layered NASA data</p>
         <button type="button" className="start" onClick={onStart}>
           Start mission ▶
