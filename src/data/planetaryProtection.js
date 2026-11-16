@@ -1,6 +1,7 @@
 const cosparPage = 'https://cosparhq.cnes.fr/cospar-policy-on-planetary-protection/';
 const cosparPolicy = 'https://cosparhq.cnes.fr/assets/uploads/2026/01/SRT_224_Editorial_PPP-Nov-2025.pdf';
-const nasaPage = 'https://sma.nasa.gov/sma-disciplines/planetary-protection/';
+const unTreaties = 'https://digitallibrary.un.org/record/626736/files/st_space_11rev2E.pdf';
+const nasaPage ='https://sma.nasa.gov/sma-disciplines/planetary-protection/';
 const nationalAcademies = 'https://www.nationalacademies.org/read/21816/chapter/8';
 
 export const routeStatus = 'Not evaluated';
@@ -9,8 +10,8 @@ export const framework = [
   {
     kind: 'International treaty',
     title: 'Outer Space Treaty (1967), Article IX',
-    text: 'States Parties must explore outer space and other celestial bodies so as to avoid their harmful contamination. This is the legal basis for planetary protection and binds the States Parties to the treaty.',
-    link: { label: 'NASA Planetary Protection', url: nasaPage },
+    text: 'States Parties shall conduct exploration of outer space, including the Moon and other celestial bodies, so as to avoid their harmful contamination and adverse changes in the environment of the Earth, and shall adopt appropriate measures where necessary. It binds the States Parties to the treaty.',
+    link: { label: 'UN Treaties and Principles on Outer Space (PDF)', url: unTreaties },
   },
   {
     kind: 'COSPAR recommendation',
@@ -63,6 +64,7 @@ export const precautions = [
 ];
 
 export const sources = [
+  { label: 'United Nations Treaties and Principles on Outer Space (Outer Space Treaty, Article IX)', url: unTreaties },
   { label: 'COSPAR Policy on Planetary Protection', url: cosparPage },
   { label: 'NASA Planetary Protection', url: nasaPage },
   { label: 'National Academies: Review of the MEPAG Report on Mars Special Regions', url: nationalAcademies },

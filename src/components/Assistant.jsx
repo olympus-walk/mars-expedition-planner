@@ -29,7 +29,7 @@ async function askAi(question, facts) {
   }
 }
 
-export default function Assistant({ grid, route, mode, limits }) {
+export default function Assistant({ grid, route, mode, limits, children }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
@@ -87,10 +87,13 @@ export default function Assistant({ grid, route, mode, limits }) {
 
   return (
     <>
-      <button ref={toggleButton} type="button" className="button button-icon assistant-toggle" onClick={() => (open ? close() : setOpen(true))}
-        aria-expanded={open} aria-controls="route-assistant" aria-label="Route assistant" title="Route assistant">
-        <Icon name="chat" />
-      </button>
+      <div className="quick-access" role="group" aria-label="Quick access">
+        <button ref={toggleButton} type="button" className="quick-button quick-assistant" onClick={() => (open ? close() : setOpen(true))}
+          aria-expanded={open} aria-controls="route-assistant" title="Route Assistant">
+          <Icon name="chat" size={20} /><span className="quick-label">Route Assistant</span>
+        </button>
+        {children}
+      </div>
 
       {open && (
         <section id="route-assistant" ref={panel} tabIndex={-1} className="assistant" aria-labelledby="route-assistant-title">
